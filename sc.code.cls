@@ -5,7 +5,7 @@ Class sc.code [ Abstract ]
 {
 
 /// export all available code
-ClassMethod export(generated = 0, system = 0, percent = 0, mapped = 0, mask = "")
+ClassMethod export(generated = 0, system = 0, percent = 0, mapped = 0, mask = "", dfi = 0)
 {
 
 	#define export(%code, %file) s sc = $system.OBJ.ExportUDL(%code, %file,"/diffexport") ##continue
@@ -73,11 +73,17 @@ ClassMethod export(generated = 0, system = 0, percent = 0, mapped = 0, mask = ""
     s rs = ##class(%SQL.Statement).%ExecDirect( .stm, sql )
     while rs.%Next() {
 		s code = rs.Name, filename = ..filename( code_".dfi" )
-		if ( '$find( code, mask ) ) continue
+		if ( '$find( filename, mask ) ) continue
 		if ($L(code,"$TRASH")>1) continue
 		$$$mkdir( filename )
-		$$$log
-		$$$export(code,filename)
+		if dfi{
+			$$$log
+			$$$export( code, filename)
+		}
+		else{
+			set filename = $extract(filename,1,*-4)
+			do ##class(%DeepSee.UserLibrary.Utils).%Export(code,filename_".xml",1)
+		}
 
 	} s rs=""
 	
@@ -87,7 +93,7 @@ ClassMethod export(generated = 0, system = 0, percent = 0, mapped = 0, mask = ""
 }
 
 /// import all from workdir
-ClassMethod import(filemask = "*.xml;*.cls;*.mac;*.int;*.inc;*.dfi", qspec = "cku-d", ByRef err = "", recurse = 1, ByRef loaded = "", verbose = 1) As %Status
+ClassMethod import(filemask = "*.xml;*.cls;*.mac;*.int;*.inc;*.dfi", qspec = "cku-d", ByRef err = "", recurse = 1, ByRef loaded = "", verbose = 1, dfi = 0) As %Status
 {
 	#define push(%dir) s dirs( $i( dirs ) ) = %dir
 	#define next(%i,%dir) s %i=$o( dirs( "" ), 1, %dir )  k:%i'="" dirs(%i)
@@ -111,10 +117,19 @@ ClassMethod import(filemask = "*.xml;*.cls;*.mac;*.int;*.inc;*.dfi", qspec = "ck
 			// check file filter
 			if ..inFilter(.fm,filename) continue
 
-			s ext = $p( filename, ".", * )
+			s ext = $zcvt($p( filename, ".", * ),"l")
 
-			if $zcvt( ext, "l" ) = "dfi" {
-				s sc = ##class(%DeepSee.UserLibrary.Utils).%Import( filename, 1, 0, 0, "", .dsloaded )
+			if (ext = "dfi") || (ext = "xml") {
+				if (ext = "dfi") {
+					s sc = ##class(%DeepSee.UserLibrary.Utils).%Import( filename, 1, 0, 0, "", .dsloaded )
+				}elseif ((ext = "xml") && dfi = 0){
+					set location = $piece(filename,"\dfi\",1)
+					set name = $piece(filename,"\dfi\",2)
+					set name = $replace(name,"\","-")
+					set filename = location_"\dfi\"_name
+					do ##class(%DeepSee.UserLibrary.Utils).%Import(filename,1,0)
+				}
+
 			} else {
 				// load classes only
 				s sc = $system.OBJ.Load( filename, "k-d", .err, .loaded)
@@ -143,7 +158,7 @@ ClassMethod import(filemask = "*.xml;*.cls;*.mac;*.int;*.inc;*.dfi", qspec = "ck
 	Q sc
 }
 
-ClassMethod inFilter(ByRef filtermask,filename) as %Boolean
+ClassMethod inFilter(ByRef filtermask, filename) As %Boolean
 {
 	s result=0
 	for 
@@ -158,7 +173,7 @@ ClassMethod inFilter(ByRef filtermask,filename) as %Boolean
 
 /// get the filtermask for the repository.
 /// looks for .gitignore file and applies all the lines to filters
-ClassMethod setIgnore(ByRef filtermask) 
+ClassMethod setIgnore(ByRef filtermask)
 {
 	
 	// working with .gitignore file
@@ -179,7 +194,6 @@ ClassMethod setIgnore(ByRef filtermask)
 quit
 }
 
-
 /// get or set working directory for export/import source
 ClassMethod workdir(workdir)
 {
@@ -195,8 +209,6 @@ ClassMethod gln() [ CodeMode = expression, Private ]
 "^"_$classname()
 }
 
-
-
 ClassMethod init()
 {
 	#define confile "/cos.json"
@@ -211,7 +223,8 @@ ClassMethod init()
 }
 
 /// export release file for list and project settings
-ClassMethod release() {
+ClassMethod release()
+{
 	s gln=..gln()
 	s list=$G(@gln@("compileList"))
 	if list="" w "Nothing to release. Run init method first" quit
@@ -222,7 +235,8 @@ ClassMethod release() {
 	w "All objects with mask "_list_" has been exported to "_release
 }
 
-ClassMethod compile() {
+ClassMethod compile()
+{
 	s gln=..gln()
 	s list=$G(@gln@("compileList"))
 	if list="" w "Nothing to compile. Run init method first" quit
@@ -269,7 +283,7 @@ ClassMethod filename(code)
 }
 
 /// import from workdir all files with ts newer than code ts in db
-ClassMethod importUpdated(filemask = "*.*", qspec = "cku-d", ByRef err = "", recurse = 1, ByRef loaded = "", verbose = 1) As %Status
+ClassMethod importUpdated(filemask = "*.*", qspec = "cku-d", ByRef err = "", recurse = 1, ByRef loaded = "", verbose = 1, dfi = 0) As %Status
 {
 	#define push(%dir) s dirs( $i( dirs ) ) = %dir
 	#define next(%i,%dir) s %i=$o( dirs( "" ), 1, %dir )  k:%i'="" dirs(%i)
@@ -303,10 +317,16 @@ ClassMethod importUpdated(filemask = "*.*", qspec = "cku-d", ByRef err = "", rec
 		   
 		   if ( filets '] codets ) continue
 			 
-		   if ext = "dfi" {
-
-			   s sc = ##class(%DeepSee.UserLibrary.Utils).%Import( filename, 1, 0, 0, "", .loaded )
-
+		   if (ext = "dfi") || (ext = "xml") {
+				if (ext = "dfi") {
+					s sc = ##class(%DeepSee.UserLibrary.Utils).%Import( filename, 1, 0, 0, "", .dsloaded )
+				}elseif ((ext = "xml") && dfi = 0){
+					set location = $piece(filename,"\dfi\",1)
+					set name = $piece(filename,"\dfi\",2)
+					set name = $replace(name,"\","-")
+					set filename = location_"\dfi\"_name
+					do ##class(%DeepSee.UserLibrary.Utils).%Import(filename,1,0)
+				}
 		   } else {
 
 			   #; drop existing code before import ( purge DateModified )
@@ -354,6 +374,4 @@ ClassMethod codets(codename, ext)
 	Q $p( ts, "." ) ;remove ms
 }
 
-
 }
-
