@@ -52,6 +52,7 @@ ClassMethod export(generated = 0, system = 0, percent = 0, mapped = 0, mask = ""
     	while rs.%Next() {
 
 	 		s code = rs.Name
+	 		w code,!
 	 		if ( 'generated && $$$isGenerated( code ) ) continue
 	 		if ( 'percent && $$$isPercented( code ) ) continue
 			if ( 'mapped && $$$isMapped( code ) ) continue
@@ -67,22 +68,27 @@ ClassMethod export(generated = 0, system = 0, percent = 0, mapped = 0, mask = ""
 
 
 	#; dfi
+	do ..fixDashIntoName()
 	#define export(%code,%file) s sc = ##class(%DeepSee.UserLibrary.Utils).%Export( %code, %file, 0 ) 
-
-	s sql = "Select fullName as Name From %DeepSee_UserLibrary.FolderItem"
+	
+	s sql = "Select id, fullName as Name, documentName From %DeepSee_UserLibrary.FolderItem"
     s rs = ##class(%SQL.Statement).%ExecDirect( .stm, sql )
     while rs.%Next() {
-		s code = rs.Name, filename = ..filename( code_".dfi" )
-		if ( '$find( filename, mask ) ) continue
+		set code = rs.Name
+		set filename = ..filename( code_".dfi" )
+		set documentName = rs.documentName
+		
+		if ( '$find($zcvt(documentName,"l"), mask ) ) continue
 		if ($L(code,"$TRASH")>1) continue
 		$$$mkdir( filename )
+		
 		if dfi{
 			$$$log
 			$$$export( code, filename)
 		}
-		else{
+		elseif ('dfi){
 			set filename = $extract(filename,1,*-4)
-			do ##class(%DeepSee.UserLibrary.Utils).%Export(code,filename_".xml",1)
+			do $system.OBJ.Export(documentName, filename_".xml")
 		}
 
 	} s rs=""
@@ -93,7 +99,7 @@ ClassMethod export(generated = 0, system = 0, percent = 0, mapped = 0, mask = ""
 }
 
 /// import all from workdir
-ClassMethod import(filemask = "*.xml;*.cls;*.mac;*.int;*.inc;*.dfi", qspec = "cku-d", ByRef err = "", recurse = 1, ByRef loaded = "", verbose = 1, dfi = 0) As %Status
+ClassMethod import(filemask = "*.xml;*.cls;*.mac;*.int;*.inc;*.dfi", qspec = "cku-d", ByRef err = "", recurse = 1, ByRef loaded = "", verbose = 1) As %Status
 {
 	#define push(%dir) s dirs( $i( dirs ) ) = %dir
 	#define next(%i,%dir) s %i=$o( dirs( "" ), 1, %dir )  k:%i'="" dirs(%i)
@@ -119,16 +125,8 @@ ClassMethod import(filemask = "*.xml;*.cls;*.mac;*.int;*.inc;*.dfi", qspec = "ck
 
 			s ext = $zcvt($p( filename, ".", * ),"l")
 
-			if (ext = "dfi") || (ext = "xml") {
-				if (ext = "dfi") {
-					s sc = ##class(%DeepSee.UserLibrary.Utils).%Import( filename, 1, 0, 0, "", .dsloaded )
-				}elseif ((ext = "xml") && dfi = 0){
-					set location = $piece(filename,"\dfi\",1)
-					set name = $piece(filename,"\dfi\",2)
-					set name = $replace(name,"\","-")
-					set filename = location_"\dfi\"_name
-					do ##class(%DeepSee.UserLibrary.Utils).%Import(filename,1,0)
-				}
+			if (ext = "dfi") {
+				s sc = ##class(%DeepSee.UserLibrary.Utils).%Import( filename, 1, 0, 0, "", .dsloaded )
 
 			} else {
 				// load classes only
@@ -283,7 +281,7 @@ ClassMethod filename(code)
 }
 
 /// import from workdir all files with ts newer than code ts in db
-ClassMethod importUpdated(filemask = "*.*", qspec = "cku-d", ByRef err = "", recurse = 1, ByRef loaded = "", verbose = 1, dfi = 0) As %Status
+ClassMethod importUpdated(filemask = "*.*", qspec = "cku-d", ByRef err = "", recurse = 1, ByRef loaded = "", verbose = 1) As %Status
 {
 	#define push(%dir) s dirs( $i( dirs ) ) = %dir
 	#define next(%i,%dir) s %i=$o( dirs( "" ), 1, %dir )  k:%i'="" dirs(%i)
@@ -317,16 +315,8 @@ ClassMethod importUpdated(filemask = "*.*", qspec = "cku-d", ByRef err = "", rec
 		   
 		   if ( filets '] codets ) continue
 			 
-		   if (ext = "dfi") || (ext = "xml") {
-				if (ext = "dfi") {
-					s sc = ##class(%DeepSee.UserLibrary.Utils).%Import( filename, 1, 0, 0, "", .dsloaded )
-				}elseif ((ext = "xml") && dfi = 0){
-					set location = $piece(filename,"\dfi\",1)
-					set name = $piece(filename,"\dfi\",2)
-					set name = $replace(name,"\","-")
-					set filename = location_"\dfi\"_name
-					do ##class(%DeepSee.UserLibrary.Utils).%Import(filename,1,0)
-				}
+		   if (ext = "dfi"){
+				s sc = ##class(%DeepSee.UserLibrary.Utils).%Import( filename, 1, 0, 0, "", .dsloaded )
 		   } else {
 
 			   #; drop existing code before import ( purge DateModified )
@@ -372,6 +362,24 @@ ClassMethod codets(codename, ext)
 		}
 	}
 	Q $p( ts, "." ) ;remove ms
+}
+
+// fix "-" into dfi files
+
+ClassMethod fixDashIntoName()
+{
+	s sql = "Select id, fullName as Name, documentName From %DeepSee_UserLibrary.FolderItem"
+    s rs = ##class(%SQL.Statement).%ExecDirect( .stm, sql )
+    while rs.%Next() {
+		if $find(rs.Name, "-"){
+			w rs.Name," -> "
+			set item = ##class(%DeepSee.UserLibrary.FolderItem).%OpenId(rs.id)
+			set item.name = $replace(item.name,"-"," ")
+			w item.name,!
+			do item.%Save()
+		}
+    }
+    k rs
 }
 
 }
