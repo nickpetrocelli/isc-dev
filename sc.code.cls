@@ -156,6 +156,22 @@ ClassMethod import(filemask = "*.xml;*.cls;*.mac;*.int;*.inc;*.dfi", qspec = "ck
 	Q sc
 }
 
+ClassMethod patch(filename = "C:\temp\workdir\patch.xml", CommitFrom = "", CommitTo = "") As %Status
+{
+	s gln = ..gln()
+	
+	set owner = @gln@("owner")
+	set repository = @gln@("repository")
+	set user = @gln@("user")
+	set password = @gln@("password")
+	
+	do ##class(sc.GitHub).Get(.items, owner, repository, user, password, CommitFrom, CommitTo)
+	//zw items
+	set sc = $system.OBJ.Export(.items,filename)
+	
+	quit sc
+}
+
 ClassMethod inFilter(ByRef filtermask, filename) As %Boolean
 {
 	s result=0
@@ -189,7 +205,7 @@ ClassMethod setIgnore(ByRef filtermask)
 	{
 		s filtermask($I(filtermask))=file.ReadLine()
 	}
-quit
+	quit
 }
 
 /// get or set working directory for export/import source
@@ -213,11 +229,24 @@ ClassMethod init()
 	set stream=##class(%Stream.FileCharacter).%New()
 	set sc=stream.LinkToFile(..workdir()_$$$confile)
 	s conf={}.%FromJSON(stream.Read($$$MaxCacheInt))
+	
 	s gln=..gln()
+	
 	s @gln@("compileList")=conf.compileList
 	s @gln@("projectName")=conf.projectName
+	s @gln@("owner")=conf.owner
+	s @gln@("repository")=conf.repository
+	s @gln@("user")=conf.user
+	s @gln@("password")=conf.password
+	
 	w "compileList="_conf.compileList,!
-	w "projectName="_conf.projectName
+	w "projectName="_conf.projectName,!
+	w "owner="_conf.owner,!
+	w "repository="_conf.repository,!
+	w "user="_conf.user,!
+	w "password="_conf.password,!
+
+	quit $$$OK
 }
 
 /// export release file for list and project settings
