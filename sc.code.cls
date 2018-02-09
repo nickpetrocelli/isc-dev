@@ -156,7 +156,7 @@ ClassMethod import(filemask = "*.xml;*.cls;*.mac;*.int;*.inc;*.dfi", qspec = "ck
 	Q sc
 }
 
-ClassMethod patch(filename = "C:\temp\workdir\patch.xml", CommitFrom = "", CommitTo = "") As %Status
+ClassMethod patch(filename = "", CommitFrom = "", CommitTo = "") As %Status
 {
 	s gln = ..gln()
 	
@@ -165,11 +165,17 @@ ClassMethod patch(filename = "C:\temp\workdir\patch.xml", CommitFrom = "", Commi
 	set user = @gln@("user")
 	set password = @gln@("password")
 	
-	do ##class(sc.GitHub).Get(.items, owner, repository, user, password, CommitFrom, CommitTo)
-	//zw items
+	set sc = ##class(sc.GitHub).Get(.items, owner, repository, user, password, CommitFrom, CommitTo)
+	return:$$$ISERR(sc) sc
+	
+	if (filename="") {
+		set filename=$G(@gln@("projectName"),"patch")
+		set filename=filename_$p($zdt($h,8)," ")_$tr($p($p($zdt($h)," ",2),":",1,2),":")_".xml"	
+	}
+	zw filename
 	set sc = $system.OBJ.Export(.items,filename)
 	
-	quit sc
+	return sc
 }
 
 ClassMethod inFilter(ByRef filtermask, filename) As %Boolean
