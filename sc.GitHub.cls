@@ -115,7 +115,7 @@ ClassMethod ToCacheName(FileName) As %String
 	set:$L(FileName,".xml")'=1 FileName = $extract(FileName,1,*-4)
 	set str = $Select($L(FileName,"cls/")>1:$Replace($P(FileName,"cls/",2),"/","."),
 	    $L(FileName,"csp/")>1:$Replace($P(FileName,"csp/",2),"/","."),
-	    $L(FileName,"dfi/")>1:$Replace($P(FileName,"dfi/",2),"/","."),
+	    $L(FileName,"dfi/")>1:$Replace($P(FileName,"dfi/",2),"/","-"),
 	    $L(FileName,"inc/")>1:$Replace($P(FileName,"inc/",2),"/","."),
 	    $L(FileName,"web/")>1:$Replace($P(FileName,"web/",2),"/","."),
 	    1:$Replace(FileName,"/",".")
