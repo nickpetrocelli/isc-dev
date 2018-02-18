@@ -229,11 +229,10 @@ ClassMethod gln() [ CodeMode = expression, Private ]
 "^"_$classname()
 }
 
-ClassMethod init()
+ClassMethod init(confile ="isc.json")
 {
-	#define confile "/cos.json"
 	set stream=##class(%Stream.FileCharacter).%New()
-	set sc=stream.LinkToFile(..workdir()_$$$confile)
+	set sc=stream.LinkToFile(..workdir()_"/"_confile)
 	s conf={}.%FromJSON(stream.Read($$$MaxCacheInt))
 	
 	s gln=..gln()
