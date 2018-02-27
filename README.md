@@ -28,9 +28,9 @@ NS> d ##class(sc.code).import()
 
 ## Compile and Release:
 
-Introduce cos.json file in the source root directory with settings for the code mask and for the name of the project. e.g.
+Introduce isc.json file in the source root directory with settings for the code mask and for the name of the project. e.g.
 ```
-cos.json
+isc.json
  "compileList": "Classes*.INC,classes*.CLS,*.DFI",
  "projectName": "myproject"
 ```
