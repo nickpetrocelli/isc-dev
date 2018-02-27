@@ -87,6 +87,7 @@ ClassMethod export(generated = 0, system = 0, percent = 0, mapped = 0, mask = ""
 			$$$export( code, filename)
 		}
 		elseif ('dfi){
+			set documentName = $replace(documentName,"/","-")
 			set filename = $extract(filename,1,*-4)
 			do $system.OBJ.Export(documentName, filename_".xml")
 		}
@@ -229,7 +230,7 @@ ClassMethod gln() [ CodeMode = expression, Private ]
 "^"_$classname()
 }
 
-ClassMethod init(confile ="isc.json")
+ClassMethod init(confile = "isc.json")
 {
 	set stream=##class(%Stream.FileCharacter).%New()
 	set sc=stream.LinkToFile(..workdir()_"/"_confile)
