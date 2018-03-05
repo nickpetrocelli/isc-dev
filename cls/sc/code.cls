@@ -157,17 +157,26 @@ ClassMethod import(filemask = "*.xml;*.cls;*.mac;*.int;*.inc;*.dfi", qspec = "ck
 	Q sc
 }
 
-ClassMethod patch(filename = "", CommitFrom = "", CommitTo = "") As %Status
+ClassMethod patch(filename = "", commitFrom = "", commitTo = "") As %Status
 {
 	s gln = ..gln()
-	
-	set owner = @gln@("owner")
-	set repository = @gln@("repository")
-	set user = @gln@("user")
-	set password = @gln@("password")
-	
-	set sc = ##class(sc.GitHub).Get(.items, owner, repository, user, password, CommitFrom, CommitTo)
-	return:$$$ISERR(sc) sc
+	s git = @gln@("git")
+
+	set:commitTo="" commitTo=1
+	if (git = 0) {
+		set:(commitFrom="")||(commitFrom=1) commitFrom=0
+		set sc = ##class(sc.diff.gitLocal).buildDiff(..workdir(), "HEAD~"_commitTo, "HEAD~"_commitFrom, .items)
+		return:$$$ISERR(sc) sc
+	}elseif(git = 1) {
+		set owner = @gln@("owner")
+		set repository = @gln@("repository")
+		set user = @gln@("user")
+		set password = @gln@("password")
+		set:commitFrom="" commitFrom=1
+		
+		set sc = ##class(sc.diff.gitHub).Get(.items, owner, repository, user, password, commitFrom, commitTo)
+		return:$$$ISERR(sc) sc	
+	}
 	
 	if (filename="") {
 		set filename=$G(@gln@("projectName"),"patch")
@@ -244,6 +253,7 @@ ClassMethod init(confile = "isc.json")
 	s @gln@("repository")=conf.repository
 	s @gln@("user")=conf.user
 	s @gln@("password")=conf.password
+	s @gln@("git")=conf.git
 	
 	w "compileList="_conf.compileList,!
 	w "projectName="_conf.projectName,!
@@ -251,7 +261,8 @@ ClassMethod init(confile = "isc.json")
 	w "repository="_conf.repository,!
 	w "user="_conf.user,!
 	w "password="_conf.password,!
-
+	w "git="_conf.git,!
+	
 	quit $$$OK
 }
 
@@ -418,3 +429,4 @@ ClassMethod fixDashIntoName()
 }
 
 }
+

@@ -1,14 +1,14 @@
-Class sc.GitHub
+Class sc.diff.gitHub
 {
 
-ClassMethod Get(Output Items, Owner As %String = "", Repository As %String = "", Username As %String = "clminstaller", Password As %String = "clminstaller2016", CommitFrom As %Integer = "", CommitTo As %Integer = "") As %Status
+ClassMethod Get(Output items, Owner As %String = "", Repository As %String = "", Username As %String = "clminstaller", Password As %String = "clminstaller2016", CommitFrom As %Integer = "", CommitTo As %Integer = "") As %Status
 {
 	#dim req As %Net.HttpRequest
 	set req = ..CreateRequest(Username, Password)
 	set req.Location = "repos/" _ Owner _ "/" _ Repository _ "/commits" 	// as described in https://developer.github.com/v3/repos/
 	
  	set links = ##class(%ListOfDataTypes).%New()
- 	set sc = ..GetSHAs(.req, CommitFrom, CommitTo,.Items)
+ 	set sc = ..GetSHAs(.req, CommitFrom, CommitTo, .items)
 
  	return sc
 }
@@ -24,13 +24,6 @@ ClassMethod GetSHAs(Request As %Net.HttpRequest, CommitFrom As %Integer, CommitT
 
 	#dim objects As List of %ZEN.proxyObject
 	set st = ##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(Request.HttpResponse.Data,,.objects,1)
-	
-	set:CommitFrom="" CommitFrom=1
-	set:CommitTo="" CommitTo=1
-	if (CommitFrom > CommitTo) {
-		w "CommitFrom can't be more than CommitTo",!
-		return $$$NO 
-	}
  
 	if ((CommitFrom >= 1) && (CommitTo <= objects.Size)) {
 		set list = ""
@@ -73,7 +66,8 @@ ClassMethod GetFileNameForReleaseBySHAs(Request As %Net.HttpRequest, SHAsList, O
 			set fileName = files.GetAt(j).%data("filename")
 			set:$L(fileName,".xml")'=1 fileName = $extract(fileName,1,*-4)
 			continue:..IsCacheFile(fileName)=0
-			set filesForRelease(..ToCacheName(fileName)) = ""
+			do ##class(sc.diff.utils).ToCacheName(.fileName)
+			set filesForRelease(fileName) = ""
 		}
 	}
 }
@@ -110,18 +104,5 @@ ClassMethod IsCacheFile(FileName As %String) As %Boolean
 	return $F(extensions,","_$ZCVT(fileExtension,"l")_",")
 }
 
-ClassMethod ToCacheName(FileName) As %String
-{
-	set:$L(FileName,".xml")'=1 FileName = $extract(FileName,1,*-4)
-	set str = $Select($L(FileName,"cls/")>1:$Replace($P(FileName,"cls/",2),"/","."),
-	    $L(FileName,"csp/")>1:$Replace($P(FileName,"csp/",2),"/","."),
-	    $L(FileName,"dfi/")>1:$Replace($P(FileName,"dfi/",2),"/","-"),
-	    $L(FileName,"inc/")>1:$Replace($P(FileName,"inc/",2),"/","."),
-	    $L(FileName,"web/")>1:$Replace($P(FileName,"web/",2),"/","."),
-	    1:$Replace(FileName,"/",".")
-	   )
-	set str = $P(str,".",1,*-1)_"."_ $ZCVT($P(str,".",*),"U")
-	quit str
 }
 
-}
