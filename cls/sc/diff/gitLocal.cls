@@ -27,7 +27,7 @@ ClassMethod buildDiff(repo As %String, sha1 As %String, sha2 As %String, Output 
 		set status = $e($piece(element, $c(9)))
 		set file = $piece(element, $c(9), 2)
 		
-		if ($l(file,"src/") '= 2) continue
+		if ($l(file,"src/") < 2) continue
 		
 		set isRelevantFile = ##class(sc.diff.utils).isRelevantFile(file)
 		if ((element="") || ('isRelevantFile))	continue
@@ -42,7 +42,7 @@ ClassMethod buildDiff(repo As %String, sha1 As %String, sha2 As %String, Output 
 		}elseif $length(element, $c(9))=3 
 		{
 			set file = $piece(element, $c(9), 3)
-			if ($l(file,"src/") '= 2) continue
+			if ($l(file,"src/") < 2) continue
 			if ((status="C") || (status="R")) 
 			{
 				do ##class(sc.diff.utils).ToCacheName(.newFile)

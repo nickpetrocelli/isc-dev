@@ -3,23 +3,33 @@ Class sc.diff.utils
 
 Parameter TRACKEDEXT As List = {$lb("xml", "cls", "csp", "csr", "mac", "int", "bas", "inc", "gbl", "prj", "obj", "pkg", "gof", "dfi", "pivot", "dashboard")};
 
-ClassMethod ToCacheName(ByRef FileName)
+ClassMethod ToCacheName(ByRef filename)
 {
-	set:$L(FileName,".xml")'=1 FileName = $extract(FileName,1,*-4)
-	set str = $Select($L(FileName,"cls/")>1:$Replace($P(FileName,"cls/",2),"/","."),
-	    $L(FileName,"csp/")>1:$Replace($P(FileName,"csp/",2),"/","."),
-	    $L(FileName,"dfi/")>1:$Replace($P(FileName,"dfi/",2),"/","-"),
-	    $L(FileName,"inc/")>1:$Replace($P(FileName,"inc/",2),"/","."),
-	    $L(FileName,"web/")>1:$Replace($P(FileName,"web/",2),"/","."),
-	    1:$Replace(FileName,"/",".")
+	do:$L(filename,".xml")>1 ..getExtension(.filename)
+	set str = $Select(
+		$L(filename,"cls/")>1:$Replace($P(filename,"cls/",2),"/","."),
+	    $L(filename,"csp/")>1:$Replace($P(filename,"csp/",2),"/","."),
+	    $L(filename,"dfi/")>1:$Replace($P(filename,"dfi/",2),"/","-"),
+	    $L(filename,"inc/")>1:$Replace($P(filename,"inc/",2),"/","."),
+	    $L(filename,"web/")>1:$Replace($P(filename,"web/",2),"/","."),
+	    1:$Replace(filename,"/",".")
 	   )
-	set FileName = $P(str,".",1,*-1)_"."_ $ZCVT($P(str,".",*),"U")
+	set filename = $P(str,".",1,*-1)_"."_ $ZCVT($P(str,".",*),"U")
 }
 
 ClassMethod isRelevantFile(file As %String) As %Boolean
 {
 	set ext = $select($length(file, ".")=1:"", 1:$piece(file, ".", *))
 	quit $lf(..#TRACKEDEXT, ext)>0
+}
+
+ClassMethod getExtension(ByRef filename)
+{
+	if ($L(filename,"dfi/") > 1) {
+		set filename = $extract(filename,1,*-4)_".DFI"
+	}elseif ($L(filename,"cls/") > 1) {
+		set filename = $extract(filename,1,*-4)_".CLS"
+	}
 }
 
 }
