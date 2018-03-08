@@ -89,7 +89,7 @@ ClassMethod export(generated = 0, system = 0, percent = 0, mapped = 0, mask = ""
 		elseif ('dfi){
 			set documentName = $replace(documentName,"/","-")
 			set filename = $extract(filename,1,*-4)
-			do $system.OBJ.Export(documentName, filename_".xml")
+			do ..fixXMLLine(documentName,filename_".xml")
 		}
 
 	} s rs=""
@@ -186,6 +186,21 @@ ClassMethod patch(filename = "", commitFrom = "", commitTo = "") As %Status
 	set sc = $system.OBJ.Export(.items,filename)
 	
 	return sc
+}
+
+ClassMethod fixXMLLine(documentName, filename) As %Status
+{
+	set stream = ##class(%Stream.FileBinary).%New()
+	do stream.LinkToFile(filename)
+	do $system.OBJ.ExportToStream(documentName, .stream)
+
+	set matcher=##class(%Regex.Matcher).%New("<Export generator=.+>")
+	set matcher.Text = stream.Read(stream.Size)
+	set data = matcher.ReplaceFirst("<Export generator=""Cache"">")
+	
+	do stream.Clear()
+	do stream.Write(data)
+	return stream.%Save()
 }
 
 ClassMethod inFilter(ByRef filtermask, filename) As %Boolean
