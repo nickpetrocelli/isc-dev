@@ -15,13 +15,6 @@ ClassMethod export(generated = 0, system = 0, percent = 0, mapped = 0, mask = ""
 	#define isPercented(%code) ("%" = $e(%code))
 	#define isMapped(%code) ##class(%RoutineMgr).IsMapped( %code )
 	#define log w !, code, " -> ", $piece(filename,..workdir(),2), " "
-	
-	#define mkdir(%filename) ##continue
-			s path = ##class(%File).GetDirectory( %filename ) ##continue
-			if '##class(%File).DirectoryExists( path ) { ##continue
-				s sc = ##class(%File).CreateDirectoryChain( path ) ##continue
-				w !, "mkdir ", path, " ", sc ##continue
-			}
 						
 	w "#; Exporting to ", ..workdir(),!
 	#; classes
@@ -38,7 +31,7 @@ ClassMethod export(generated = 0, system = 0, percent = 0, mapped = 0, mask = ""
 			if ( '$find( code, mask ) ) continue
 			
 			s filename = ..filename( code )
-			$$$mkdir( filename )
+			do ..mkdir( filename )
 			$$$log
 			$$$export( code, filename )
 
@@ -59,7 +52,7 @@ ClassMethod export(generated = 0, system = 0, percent = 0, mapped = 0, mask = ""
 			if ( '$find( code, mask ) ) continue
 			
 			s filename = ..filename( code )
-			$$$mkdir( filename )
+			do ..mkdir( filename )
 			$$$log
 			$$$export( code, filename )
 
@@ -80,7 +73,7 @@ ClassMethod export(generated = 0, system = 0, percent = 0, mapped = 0, mask = ""
 		
 		if ( '$find($zcvt(documentName,"l"), mask ) ) continue
 		if ($L(code,"$TRASH")>1) continue
-		$$$mkdir( filename )
+		do ..mkdir( filename )
 		
 		if dfi{
 			$$$log
@@ -93,6 +86,9 @@ ClassMethod export(generated = 0, system = 0, percent = 0, mapped = 0, mask = ""
 		}
 
 	} s rs=""
+	
+	#;DeepSee artefacts
+	do ..exportDeepSeeArtefacts()
 	
 	w !,!, "#; Exported to ", ..workdir()
 	
@@ -155,6 +151,26 @@ ClassMethod import(filemask = "*.xml;*.cls;*.mac;*.int;*.inc;*.dfi", qspec = "ck
 		w !,!,"#; Imported from ", ..workdir()
 		}
 	Q sc
+}
+
+ClassMethod exportDeepSeeArtefacts() As %Status
+{
+	set sc = $$$OK
+	set artefacts = $listbuild("DeepSee.Variables","DeepSee.TermList","DeepSee.CalcMbrs")
+	
+	for i=1:1:$listlength(artefacts)
+	{
+		set artefact = $list(artefacts,i)
+		continue:$data(@("^"_artefact))=0
+		
+		set artefact = artefact_".GBL"
+		set filename = ..filename(artefact)
+		do ..mkdir(filename)
+
+		set sc = ..fixXMLLine(artefact, filename_".xml")
+	}
+
+	return sc
 }
 
 ClassMethod patch(filename = "", commitFrom = "", commitTo = "") As %Status
@@ -333,11 +349,12 @@ ClassMethod filename(code)
 	s $p(filename,".",*)=ext
 	//B:code="DPRep.Rest.JSON.cls" "L"
 	#; for *.cls Package.Subpackage.ClassName.cls -> Folder/Subfolder/ClassName.cls
-	if ext ="cls" {
+	if (ext="cls") || (ext="gbl") {
 		s dirs = $piece( code, ".",1, *-2 ), dirs = $translate( dirs, ".", "/" )
 		s relpath = dirs _ "/" _ $piece( code, ".", *-1, * ) ;
 		s filename = ##class(%File).NormalizeFilename( relpath, wd )
 	}
+
 	Q filename
 }
 
@@ -441,6 +458,18 @@ ClassMethod fixDashIntoName()
 		}
     }
     k rs
+}
+
+ClassMethod mkdir(filename As %String) As %Status
+{
+	s sc = $$$OK
+	s path = ##class(%File).GetDirectory(filename) 
+	if '##class(%File).DirectoryExists(path) 
+	{
+		s sc = ##class(%File).CreateDirectoryChain(path) 
+		w !, "mkdir ", path, " ", sc 
+	}
+	return sc
 }
 
 }
