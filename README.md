@@ -1,5 +1,5 @@
-# ISC-DEV-IO
-Export/Import sources in UDL format for [ISC Caché 2016.2](http://www.intersystems.com/our-products/cache/cache-overview/)
+# ISC-DEV
+Export/Import source code (classes, macro, routines) and DeepSee artefacts(pivots, dashboards) from and to InterSystems Data Platform products(Caché, Ensemble, IRIS). Support versions from 2016.2
 
 # Installation
 Download code and run
