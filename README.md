@@ -1,11 +1,11 @@
 # ISC-DEV
-Export/Import source code (classes, macro, routines) and DeepSee artefacts(pivots, dashboards) from and to InterSystems Data Platform products(Caché, Ensemble, IRIS). Support versions from 2016.2
+Export/Import source code (classes, macro, routines) and DeepSee artefacts(pivots, dashboards, termlists, pivot variables, shared measures) from and to InterSystems Data Platform products(Caché, Ensemble, IRIS). Support versions from 2016.2
 
 # Installation
 Download code and run
 ```
-set dir="/dir/cache-udl
-do $System.OBJ.ImportDir(dir,"*.xml;*.cls;*.mac;*.int;*.inc;*.dfi","ck",,1)
+set dir="/your_download_dir/isc-dev
+do $System.OBJ.ImportDir(dir,"*.xml;*.cls;*.mac;*.int;*.inc;*.dfi","cuk",,1)
 ```
 or
 import the [release](https://github.com/intersystems-ru/cache-udl/releases) to the namespace.
@@ -31,9 +31,15 @@ NS> d ##class(sc.code).import()
 
 Introduce isc.json file in the source root directory with settings for the code mask, for the name of the project and for get the patch form local git or GitHub. e.g.
 ```
-"git": 0 - files diff from local git
+"git": 0 - files diff from local git (default)
 "git": 1 - files diff from GitHub
+use below params in case of "git" : 1
+"owner":  - name of the github e.g. intersystems-community
+"repository": - name of the repo e.g. dc-analytics
+ "user": - user and password for private github repo
+ "password": 
 ```
+
 
 ```
 isc.json
@@ -64,6 +70,9 @@ NS> s commitFrom = 1
 NS> s commitTo = 5
 NS> d ##class(sc.code).patch(filename,commitFrom,commitTo)
 ```
+
+## Known issues
+Be careful with import termlists, pivot variables and shared measures. In current implementation imported artefacts replace those you have in the target namespace. It happens because the utility uses standard global import for globals in XML with $System.OBJ.Import which kills the global first and imports the new one.
 
 
 
