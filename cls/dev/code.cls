@@ -1,7 +1,7 @@
 /// Export different types of modules in different subfolders in UDL (plain) format
 /// test.dfi -> /dfi/test.dfi
 /// testpkg.test.cls -> /cls/testpkg/test.cls
-Class sc.code [ Abstract ]
+Class dev.code [ Abstract ]
 {
 
 /// export all available code
@@ -181,7 +181,7 @@ ClassMethod patch(filename = "", commitFrom = "", commitTo = "") As %Status
 	set:commitTo="" commitTo=1
 	if (git = 0) {
 		set:(commitFrom="")||(commitFrom=1) commitFrom=0
-		set sc = ##class(sc.diff.gitLocal).buildDiff(..workdir(), "HEAD~"_commitTo, "HEAD~"_commitFrom, .items)
+		set sc = ##class(dev.diff.gitLocal).buildDiff(..workdir(), "HEAD~"_commitTo, "HEAD~"_commitFrom, .items)
 		return:$$$ISERR(sc) sc
 	}elseif(git = 1) {
 		set owner = @gln@("owner")
@@ -190,7 +190,7 @@ ClassMethod patch(filename = "", commitFrom = "", commitTo = "") As %Status
 		set password = @gln@("password")
 		set:commitFrom="" commitFrom=1
 		
-		set sc = ##class(sc.diff.gitHub).Get(.items, owner, repository, user, password, commitFrom, commitTo)
+		set sc = ##class(dev.diff.gitHub).Get(.items, owner, repository, user, password, commitFrom, commitTo)
 		return:$$$ISERR(sc) sc	
 	}
 	

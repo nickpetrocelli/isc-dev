@@ -1,4 +1,4 @@
-Class sc.diff.gitLocal
+Class dev.diff.gitLocal
 {
 
 /// Get diff between two points in repository

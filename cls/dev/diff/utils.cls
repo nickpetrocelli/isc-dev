@@ -1,4 +1,4 @@
-Class sc.diff.utils
+Class dev.diff.utils
 {
 
 Parameter TRACKEDEXT As List = {$lb("xml", "cls", "csp", "csr", "mac", "int", "bas", "inc", "gbl", "prj", "obj", "pkg", "gof", "dfi", "pivot", "dashboard")};
