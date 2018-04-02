@@ -17,8 +17,8 @@ ClassMethod checkDataSource(onlyerror As %Boolean = 1)
 		{
 			set widget = widgets.GetAt(i)
 			set pivotName =  widget.dataSource
-			set sc = ..GetMdx(pivotName, .MDX)
-			set sc = ..CheckPivot(MDX)
+			set sc = ..getMdx(pivotName, .MDX)
+			set sc = ..checkPivot(MDX)
 			
 			continue:sc&&onlyerror
 			
