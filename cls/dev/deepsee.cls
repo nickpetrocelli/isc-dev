@@ -9,21 +9,22 @@ ClassMethod checkDataSource(onlyerror As %Boolean = 1)
 	&sql(FETCH C1)
 	WHILE (SQLCODE = 0)
 	{	
+		set flag = 1
 		set dashbord = ##class(%DeepSee.Dashboard.Definition).%OpenId(id)
-		
-		
 		set widgets = dashbord.widgets
+		
 		for i=1:1:widgets.Count()
 		{
 			set widget = widgets.GetAt(i)
 			set pivotName =  widget.dataSource
-			set sc = ..getMdx(pivotName, .MDX)
-			set sc = ..checkPivot(MDX)
+			set sc = ..GetMdx(pivotName, .MDX)
+			set sc = ..CheckPivot(MDX)
 			
 			continue:sc&&onlyerror
 			
-			w:i=1 dashbord.name,!
+			w:flag=1 dashbord.name,!
 			w "   pivot: ",pivotName,"  status: "_$select(sc'=1:$System.Status.GetErrorText(sc),1:"OK"),!
+			set flag = 0
 		}
 		&sql(FETCH C1) 
 	}
