@@ -16,15 +16,15 @@ Map sc package to %All namespace to make it visible in any namespace.
 
 ## Setup working directory ( optional )
 ```
-NS> w ##class(sc.code).workdir("/path/to/your/working/directory/")
+NS> w ##class(dev.code).workdir("/path/to/your/working/directory/")
 ```
 ## Export to working directory:
 ```
-NS> d ##class(sc.code).export()
+NS> d ##class(dev.code).export()
 ```
 ## Import:
 ```
-NS> d ##class(sc.code).import()
+NS> d ##class(dev.code).import()
 ```
 
 ## Compile, Release and Patch:
@@ -53,22 +53,22 @@ isc.json
 ```
 Run init method to initialize project settings:
 ```
-NS> d ##class(sc.code).init()
+NS> d ##class(dev.code).init()
 ```
 Then run release to export all the classes in comileList into one "myproject.xml" release file. It will export it into the default for current Namespace directory.
 ```
-NS> d ##class(sc.code).release()
+NS> d ##class(dev.code).release()
 ```
 Or compile it whenever you want to compile all the proejct related resources.
 ```
-NS> d ##class(sc.code).compile()
+NS> d ##class(dev.code).compile()
 ```
 Get last changes from github or local git. Run patch to export the classes in comileList into one "patch.xml" patch file. It will export it into the default for current Namespace directory or you can choose where export. By default, makes a patch from the last commit if you do not specify `commitFrom` and `commitTo` e.g.
 ```
 NS> s filename = "c:\patch.xml"
 NS> s commitFrom = 1
 NS> s commitTo = 5
-NS> d ##class(sc.code).patch(filename,commitFrom,commitTo)
+NS> d ##class(dev.code).patch(filename,commitFrom,commitTo)
 ```
 
 ## Known issues
