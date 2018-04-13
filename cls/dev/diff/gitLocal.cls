@@ -26,7 +26,7 @@ ClassMethod buildDiff(repo As %String, sha1 As %String, sha2 As %String, Output 
 		set element = $piece(diffRaw, $c(10), i)
 		set status = $e($piece(element, $c(9)))
 		set file = $piece(element, $c(9), 2)
-		zw file
+
 		if ($l(file,"src/") < 2) continue
 		
 		set isRelevantFile = ##class(dev.diff.utils).isRelevantFile(file)
