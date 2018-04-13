@@ -26,17 +26,17 @@ ClassMethod buildDiff(repo As %String, sha1 As %String, sha2 As %String, Output 
 		set element = $piece(diffRaw, $c(10), i)
 		set status = $e($piece(element, $c(9)))
 		set file = $piece(element, $c(9), 2)
-		
+		zw file
 		if ($l(file,"src/") < 2) continue
 		
-		set isRelevantFile = ##class(sc.diff.utils).isRelevantFile(file)
+		set isRelevantFile = ##class(dev.diff.utils).isRelevantFile(file)
 		if ((element="") || ('isRelevantFile))	continue
 		
 		if $length(element, $c(9))=2 
 		{
 			if ((status="M") || (status="U")) || (status="A") 
 			{
-				do ##class(sc.diff.utils).ToCacheName(.file)
+				do ##class(dev.diff.utils).ToCacheName(.file)
 				set items(file) = ""
 			}
 		}elseif $length(element, $c(9))=3 
@@ -45,7 +45,7 @@ ClassMethod buildDiff(repo As %String, sha1 As %String, sha2 As %String, Output 
 			if ($l(file,"src/") < 2) continue
 			if ((status="C") || (status="R")) 
 			{
-				do ##class(sc.diff.utils).ToCacheName(.newFile)
+				do ##class(dev.diff.utils).ToCacheName(.newFile)
 				set items(file) = ""
 			}
 		}
