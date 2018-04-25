@@ -297,6 +297,12 @@ ClassMethod init(confile = "isc.json")
 	quit $$$OK
 }
 
+ClassMethod initDefaultValue() [ CodeMode = objectgenerator ]
+{
+	s gln = "^"_%class.Name
+	s @gln@("git")=0
+}
+
 /// export release file for list and project settings
 ClassMethod release()
 {
