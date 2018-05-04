@@ -21,13 +21,16 @@ ClassMethod buildDiff(repo As %String, sha1 As %String, sha2 As %String, Output 
 	$$$TOE(sc, ..execute($$$FormatText("git diff --name-status %1 %2 > %3 2>&3", sha1, sha2, tempFile)))
 	$$$TOE(sc, ..fileToString(tempFile, .diffRaw))
 	
+	set workdir = ##class(dev.code).workdir()
+	set path = ##class(dev.diff.utils).getLocalGitPathByWorkdir(workdir)
+	
 	for i=1:1:$length(diffRaw, $c(10)) 
 	{
 		set element = $piece(diffRaw, $c(10), i)
 		set status = $e($piece(element, $c(9)))
 		set file = $piece(element, $c(9), 2)
-
-		if ($l(file,"src/") < 2) continue
+		
+		if ($l(file, path) < 2) continue
 		
 		set isRelevantFile = ##class(dev.diff.utils).isRelevantFile(file)
 		if ((element="") || ('isRelevantFile))	continue
@@ -42,7 +45,7 @@ ClassMethod buildDiff(repo As %String, sha1 As %String, sha2 As %String, Output 
 		}elseif $length(element, $c(9))=3 
 		{
 			set file = $piece(element, $c(9), 3)
-			if ($l(file,"src/") < 2) continue
+			if ($l(file, path) < 2) continue
 			if ((status="C") || (status="R")) 
 			{
 				do ##class(dev.diff.utils).ToCacheName(.newFile)

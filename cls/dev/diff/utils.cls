@@ -32,5 +32,26 @@ ClassMethod getExtension(ByRef filename)
 	}
 }
 
+ClassMethod getLocalGitPathByWorkdir(workdir As %String) As %String
+{
+	set path = ""
+	if ($L(workdir,"/") > 1) {
+		if ($P(workdir,"/",*) = "") {
+			set path = $P(workdir,"/",*-1)
+		}else {
+			set path = $P(workdir,"/",*)
+		}
+
+	}else {
+		if ($P(workdir,"\",*) = "") {
+			set path = $P(workdir,"\",*-1)
+		}else {
+			set path = $P(workdir,"\",*)
+		}
+	}
+	
+	return path_"/"
+}
+
 }
 
