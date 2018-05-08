@@ -18,7 +18,7 @@ ClassMethod buildDiff(repo As %String, sha1 As %String, sha2 As %String, Output 
 {
 	$$$TOE(sc, ..createFile(.tempFile))
 	do $system.Process.CurrentDirectory(repo)
-	$$$TOE(sc, ..execute($$$FormatText("git diff --name-status %1 %2 > %3 2>&3", sha1, sha2, tempFile)))
+	$$$TOE(sc, ..execute($$$FormatText("git diff --name-status %1 %2 > %3 2>&1", sha1, sha2, tempFile)))
 	$$$TOE(sc, ..fileToString(tempFile, .diffRaw))
 	
 	set workdir = ##class(dev.code).workdir()
