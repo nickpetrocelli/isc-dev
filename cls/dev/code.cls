@@ -284,7 +284,7 @@ ClassMethod init(confile = "isc.json")
 	s @gln@("repository")=conf.repository
 	s @gln@("user")=conf.user
 	s @gln@("password")=conf.password
-	s @gln@("git")=$select($data(conf.git):conf.git, 1:0)
+	s @gln@("git")=conf.git
 	
 	w "compileList="_conf.compileList,!
 	w "projectName="_conf.projectName,!
