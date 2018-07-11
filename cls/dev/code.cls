@@ -480,5 +480,10 @@ ClassMethod mkdir(filename As %String) As %Status
 	return sc
 }
 
+ClassMethod getVersion() [ CodeMode = expression ]
+{
+"Version: "_..#version
+}
+
 }
 
