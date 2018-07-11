@@ -30,7 +30,7 @@ ClassMethod getExtension(ByRef filename)
 	}elseif ($L(filename,"cls/") > 1) {
 		set filename = $extract(filename,1,*-4)_".CLS"
 	}elseif ($L(filename,"gbl/") > 1) {
-		set filename = $p($extract(filename,1,*-4)_".GBL","gbl/",2)
+		set filename = $p($extract(filename,1,*-4),"gbl/",2)
 	}
 }
 
