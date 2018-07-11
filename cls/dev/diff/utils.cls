@@ -5,7 +5,7 @@ Parameter TRACKEDEXT As List = {$lb("xml", "cls", "csp", "csr", "mac", "int", "b
 
 ClassMethod ToCacheName(ByRef filename)
 {
-	do:$L(filename,".xml")>1 ..getExtension(.filename)
+	do:$L($zcvt(filename,"L"),".xml")>1 ..getExtension(.filename)
 	set str = $Select(
 		$L(filename,"cls/")>1:$Replace($P(filename,"cls/",2),"/","."),
 	    $L(filename,"csp/")>1:$Replace($P(filename,"csp/",2),"/","."),
