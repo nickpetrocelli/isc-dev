@@ -17,6 +17,7 @@ Class dev.diff.gitLocal
 ClassMethod buildDiff(repo As %String, sha1 As %String, sha2 As %String, Output items) As %Status
 {
 	$$$TOE(sc, ..createFile(.tempFile))
+	set oldDirectory = $system.Process.CurrentDirectory()
 	do $system.Process.CurrentDirectory(repo)
 	$$$TOE(sc, ..execute($$$FormatText("git diff --name-status %1 %2 > %3 2>&1", sha1, sha2, tempFile)))
 	$$$TOE(sc, ..fileToString(tempFile, .diffRaw))
@@ -53,6 +54,7 @@ ClassMethod buildDiff(repo As %String, sha1 As %String, sha2 As %String, Output 
 			}
 		}
 	}
+	do $system.Process.CurrentDirectory(oldDirectory)
 	return sc
 }
 
