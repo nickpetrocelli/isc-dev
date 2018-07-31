@@ -260,7 +260,10 @@ ClassMethod setIgnore(ByRef filtermask)
 /// get or set working directory for export/import source
 ClassMethod workdir(workdir)
 {
-	s gln = ..gln() s:$d(workdir) @gln = workdir
+	set:$d(workdir) workdir = ##class(%File).NormalizeDirectory(workdir)
+	s gln = ..gln() 
+	s:$d(workdir) @gln = workdir
+	
 	///zu(12) namespace directory by default
 	#define nsdir $zu(12,"")
 	Q $g(@gln, $$$nsdir)
@@ -272,13 +275,17 @@ ClassMethod gln() [ CodeMode = expression, Private ]
 "^"_$classname()
 }
 
-ClassMethod init(confile = "isc.json")
+ClassMethod init(confile = "isc.json") [ CodeMode = objectgenerator ]
 {
-	set stream=##class(%Stream.FileCharacter).%New()
-	set sc=stream.LinkToFile(..workdir()_"/"_confile)
+	s:$g(confile)="" confile = "isc.json"
+	q:..workdir()=""
+	q:'##class(%File).Exists(..workdir()_confile) $$$OK
+	
+	s stream=##class(%Stream.FileCharacter).%New()
+	s sc=stream.LinkToFile(..workdir()_confile)
 	s conf={}.%FromJSON(stream.Read($$$MaxCacheInt))
 	
-	s gln=..gln()
+	s gln = "^"_%class.Name
 	
 	s @gln@("compileList")=conf.compileList
 	s @gln@("projectName")=conf.projectName
@@ -287,6 +294,7 @@ ClassMethod init(confile = "isc.json")
 	s @gln@("user")=conf.user
 	s @gln@("password")=conf.password
 	s @gln@("git")=conf.git
+	s:@gln@("git")="" @gln@("git")=0
 	
 	w "compileList="_conf.compileList,!
 	w "projectName="_conf.projectName,!
@@ -297,12 +305,6 @@ ClassMethod init(confile = "isc.json")
 	w "git="_conf.git,!
 	
 	quit $$$OK
-}
-
-ClassMethod initDefaultValue() [ CodeMode = objectgenerator ]
-{
-	s gln = "^"_%class.Name
-	s @gln@("git")=0
 }
 
 /// export release file for list and project settings
