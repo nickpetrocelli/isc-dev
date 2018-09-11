@@ -49,7 +49,7 @@ ClassMethod buildDiff(repo As %String, sha1 As %String, sha2 As %String, Output 
 			if ($l(file, path) < 2) continue
 			if ((status="C") || (status="R")) 
 			{
-				do ##class(dev.diff.utils).ToCacheName(.newFile)
+				do ##class(dev.diff.utils).ToCacheName(.file)
 				set items(file) = ""
 			}
 		}
