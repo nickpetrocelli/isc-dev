@@ -275,17 +275,16 @@ ClassMethod gln() [ CodeMode = expression, Private ]
 "^"_$classname()
 }
 
-ClassMethod init(confile = "isc.json") [ CodeMode = objectgenerator ]
+ClassMethod init(confile = "isc.json")
 {
-	s:$g(confile)="" confile = "isc.json"
-	q:..workdir()=""
-	q:'##class(%File).Exists(..workdir()_confile) $$$OK
+	q:..workdir()="" "workdir is empty"
+	q:'##class(%File).Exists(..workdir()_confile) "configuration file: "_confile_" not found in "_..workdir()
 	
 	s stream=##class(%Stream.FileCharacter).%New()
 	s sc=stream.LinkToFile(..workdir()_confile)
 	s conf={}.%FromJSON(stream.Read($$$MaxCacheInt))
 	
-	s gln = "^"_%class.Name
+	s gln = "^dev.code"
 	
 	s @gln@("compileList")=conf.compileList
 	s @gln@("projectName")=conf.projectName
