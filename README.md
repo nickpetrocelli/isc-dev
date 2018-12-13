@@ -58,7 +58,7 @@ Run init method to initialize project settings:
 ```
 NS> d ##class(dev.code).init()
 ```
-Then run release to export all the classes in comileList into one "myproject.xml" release file. It will export it into the default for current Namespace directory.
+Then run release to export all the classes in compileList into one "myproject.xml" release file. It will export it into the default for current Namespace directory.
 ```
 NS> d ##class(dev.code).release()
 ```
@@ -66,7 +66,7 @@ Or compile it whenever you want to compile all the proejct related resources.
 ```
 NS> d ##class(dev.code).compile()
 ```
-Get last changes from github or local git. Run patch to export the classes in comileList into one "patch.xml" patch file. It will export it into the default for current Namespace directory or you can choose where export. By default, makes a patch from the last commit if you do not specify `commitFrom` and `commitTo` e.g.
+Get last changes from github or local git. Run patch to export the classes in compileList into one "patch.xml" patch file. It will export it into the default for current Namespace directory or you can choose where export. By default, makes a patch from the last commit if you do not specify `commitFrom` and `commitTo` e.g.
 ```
 NS> s filename = "c:\patch.xml"
 NS> s commitFrom = 1
