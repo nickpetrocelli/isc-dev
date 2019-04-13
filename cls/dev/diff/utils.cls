@@ -56,4 +56,3 @@ ClassMethod getLocalGitPathByWorkdir(workdir As %String) As %String
 }
 
 }
-
