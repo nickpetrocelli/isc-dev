@@ -5,6 +5,7 @@ Parameter TRACKEDEXT As List = {$lb("xml", "cls", "csp", "csr", "mac", "int", "b
 
 ClassMethod ToCacheName(ByRef filename)
 {
+	if $get(filename)="" break
 	do:$L($zcvt(filename,"L"),".xml")>1 ..getExtension(.filename)
 	set str = $Select(
 		$L(filename,"cls/")>1:$Replace($P(filename,"cls/",2),"/","."),
@@ -56,3 +57,4 @@ ClassMethod getLocalGitPathByWorkdir(workdir As %String) As %String
 }
 
 }
+

@@ -63,6 +63,15 @@ ClassMethod export(generated = 0, system = 0, percent = 0, mapped = 0, mask = ""
 
 
 	#; dfi
+	do ..exportDFI(dfi)
+	
+	w !,!, "#; Exported to ", ..workdir()
+	
+    Q 1
+}
+
+ClassMethod exportDFI(dfi = 0) As %Status
+{
 	do ..fixDashIntoName()
 	#define export(%code,%file) s sc = ##class(%DeepSee.UserLibrary.Utils).%Export( %code, %file, 0 ) 
 	
@@ -92,9 +101,7 @@ ClassMethod export(generated = 0, system = 0, percent = 0, mapped = 0, mask = ""
 	#;DeepSee artefacts
 	do ..exportDeepSeeArtefacts()
 	
-	w !,!, "#; Exported to ", ..workdir()
-	
-    Q 1
+	return $$$OK
 }
 
 /// import all from workdir
