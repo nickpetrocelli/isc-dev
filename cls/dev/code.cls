@@ -7,9 +7,9 @@ Class dev.code [ Abstract ]
 Parameter version = "1.1.0.2";
 
 /// export all available code
-ClassMethod export(generated = 0, system = 0, percent = 0, mapped = 0, mask = "", dfi = 0)
+ClassMethod export(mask = "", generated = 0, system = 0, percent = 0, mapped = 0, dfi = 0)
 {
-
+	
 	#define export(%code, %file) s sc = $system.OBJ.ExportUDL(%code, %file,"/diffexport") ##continue
 								 w:sc "Ok" d:'sc $system.OBJ.DisplayError(sc)
 
@@ -63,15 +63,6 @@ ClassMethod export(generated = 0, system = 0, percent = 0, mapped = 0, mask = ""
 
 
 	#; dfi
-	do ..exportDFI(dfi)
-	
-	w !,!, "#; Exported to ", ..workdir()
-	
-    Q 1
-}
-
-ClassMethod exportDFI(dfi = 0) As %Status
-{
 	do ..fixDashIntoName()
 	#define export(%code,%file) s sc = ##class(%DeepSee.UserLibrary.Utils).%Export( %code, %file, 0 ) 
 	
@@ -85,6 +76,11 @@ ClassMethod exportDFI(dfi = 0) As %Status
 		if ( '$find($zcvt(documentName,"l"), mask ) ) continue
 		if ($L(code,"$TRASH")>1) continue
 		do ..mkdir( filename )
+		
+		if ( 'generated && $$$isGenerated( code ) ) continue
+	 	if ( 'percent && $$$isPercented( code ) ) continue
+		if ( 'mapped && $$$isMapped( code ) ) continue
+		if ( '$find( code, mask ) ) continue
 		
 		if dfi{
 			$$$log
@@ -101,7 +97,9 @@ ClassMethod exportDFI(dfi = 0) As %Status
 	#;DeepSee artefacts
 	do ..exportDeepSeeArtefacts()
 	
-	return $$$OK
+	w !,!, "#; Exported to ", ..workdir()
+	
+    Q 1
 }
 
 /// import all from workdir
