@@ -4,12 +4,11 @@
 Class dev.code [ Abstract ]
 {
 
-Parameter version = "1.1.0.2";
+Parameter version = "1.1.0.4";
 
 /// export all available code
 ClassMethod export(mask = "", generated = 0, system = 0, percent = 0, mapped = 0, dfi = 0)
 {
-	
 	#define export(%code, %file) s sc = $system.OBJ.ExportUDL(%code, %file,"/diffexport") ##continue
 								 w:sc "Ok" d:'sc $system.OBJ.DisplayError(sc)
 
@@ -30,7 +29,7 @@ ClassMethod export(mask = "", generated = 0, system = 0, percent = 0, mapped = 0
 			if ( 'generated && $$$isGenerated( code ) ) continue
 			if ( 'percent && $$$isPercented( code ) ) continue
 			if ( 'mapped && $$$isMapped( code ) ) continue
-			if ( '$find( code, mask ) ) continue
+			if ( '..checkMasks( code, mask ) ) continue
 			
 			s filename = ..filename( code )
 			do ..mkdir( filename )
@@ -51,7 +50,7 @@ ClassMethod export(mask = "", generated = 0, system = 0, percent = 0, mapped = 0
 	 		if ( 'generated && $$$isGenerated( code ) ) continue
 	 		if ( 'percent && $$$isPercented( code ) ) continue
 			if ( 'mapped && $$$isMapped( code ) ) continue
-			if ( '$find( code, mask ) ) continue
+			if ( '..checkMasks( code, mask ) ) continue
 			
 			s filename = ..filename( code )
 			do ..mkdir( filename )
@@ -73,14 +72,14 @@ ClassMethod export(mask = "", generated = 0, system = 0, percent = 0, mapped = 0
 		set filename = ..filename( code_".dfi" )
 		set documentName = rs.documentName
 		
-		//if ( '$find($zcvt(documentName,"l"), $zcvt(mask,"l") ) ) continue
 		if ($L(code,"$TRASH")>1) continue
-		do ..mkdir( filename )
 		
 		if ( 'generated && $$$isGenerated( code ) ) continue
 	 	if ( 'percent && $$$isPercented( code ) ) continue
 		if ( 'mapped && $$$isMapped( code ) ) continue
-		if ( '$find($zcvt(documentName,"l"), $zcvt(mask,"l") ) ) continue
+		if ( '..checkMasks(documentName, mask) ) continue
+		
+		do ..mkdir( filename )
 		
 		if dfi{
 			$$$log
@@ -489,6 +488,37 @@ ClassMethod mkdir(filename As %String) As %Status
 ClassMethod getVersion() [ CodeMode = expression ]
 {
 "Version: "_..#version
+}
+
+ClassMethod checkMasks(name As %String, masks As %String) As %Boolean
+{
+	return:masks="" 1
+	return:name="" 0
+	
+	set name = $zcvt(name,"l")
+	set masks =  $zcvt(masks,"l")
+	
+	for i=1:1:$l(masks,",")
+	{
+		set pattern = "^"
+		set mask = $p(masks, ",", i)
+		
+		for index=1:1:$l(mask)
+		{
+			set char = $e(mask, index)
+    		set pattern = pattern _ $case(char,
+    									  ".":"\.",
+    									  "?":".",
+    									  "*":".*",
+    									     :char
+    									  )	
+		}
+		set pattern = pattern _ "$|"
+	}
+	set pattern = $e(pattern,1,*-1)
+	set matcher=##class(%Regex.Matcher).%New(pattern, name)
+	do matcher.Locate() 
+	return $select(matcher.Group="":0, 1:1)
 }
 
 }
