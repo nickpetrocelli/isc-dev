@@ -73,14 +73,14 @@ ClassMethod export(mask = "", generated = 0, system = 0, percent = 0, mapped = 0
 		set filename = ..filename( code_".dfi" )
 		set documentName = rs.documentName
 		
-		if ( '$find($zcvt(documentName,"l"), mask ) ) continue
+		//if ( '$find($zcvt(documentName,"l"), $zcvt(mask,"l") ) ) continue
 		if ($L(code,"$TRASH")>1) continue
 		do ..mkdir( filename )
 		
 		if ( 'generated && $$$isGenerated( code ) ) continue
 	 	if ( 'percent && $$$isPercented( code ) ) continue
 		if ( 'mapped && $$$isMapped( code ) ) continue
-		if ( '$find( code, mask ) ) continue
+		if ( '$find($zcvt(documentName,"l"), $zcvt(mask,"l") ) ) continue
 		
 		if dfi{
 			$$$log
