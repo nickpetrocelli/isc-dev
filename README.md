@@ -77,7 +77,13 @@ NS> d ##class(dev.code).patch(filename,commitFrom,commitTo)
 ## Known issues
 Be careful with import termlists, pivot variables and shared measures. In current implementation imported artefacts replace those you have in the target namespace. It happens because the utility uses standard global import for globals in XML with $System.OBJ.Import which kills the global first and imports the new one.
 
+#### If after using the export command, git treats unaltered files as modified, the problem may be in the following:
+- When moving sources from one OS to another (f.e. from win to mac), the end of the line character was not taken into account. To fix this, you need to specify git to make the end of line character look the same.
 
+  solution: ```git config --global core.autocrlf input```
+- File access rights have been changed. In this case, you will need to specify that you do not want to track these changes.
+
+  solution: ```git config core.filemode false```
 
 
 
