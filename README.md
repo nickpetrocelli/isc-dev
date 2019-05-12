@@ -85,6 +85,19 @@ Be careful with import termlists, pivot variables and shared measures. In curren
 
   solution: ```git config core.filemode false```
 
+## Development
+
+To update the module in ZPM do the following:
+USER> zpm
+zpm: USER>load /opt
+zpm: USER>repo -n registry -user USER -pass PASSWORD
+1) Filesystem
+2) Local Cache
+3) Remote Repository
+
+Which sort of repository do you wish to configure? 3
+zpm: USER>module-action isc-dev publish
+
 
 
 
