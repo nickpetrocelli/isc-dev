@@ -3,7 +3,7 @@
   <Document name="isc-dev.MODULE">
     <Module>
       <Name>isc-dev</Name>
-      <Version>1.1.0</Version>
+      <Version>1.2.0</Version>
       <Packaging>module</Packaging>
       <Resource Name="dev.PKG"/>
     </Module>
