@@ -183,8 +183,8 @@ ClassMethod exportGlobals(mask = "") As %Status
 {
 	#include %occInclude
 	set statement=##class(%SQL.Statement).%New()
- 	set status=statement.%PrepareClassQuery("%SYS.GlobalQuery","NameSpaceListChui")
- 	if $$$ISERR(status) { do $system.OBJ.DisplayError(status) }
+ 	set sc=statement.%PrepareClassQuery("%SYS.GlobalQuery","NameSpaceListChui")
+ 	if $$$ISERR(sc) { do $system.OBJ.DisplayError(status) }
  	set resultset=statement.%Execute($namespace)
  	while resultset.%Next() {
    	 	set gname = resultset.%Get("Name")
@@ -194,7 +194,6 @@ ClassMethod exportGlobals(mask = "") As %Status
 	 	continue:$$$isPercented(gname)
 		continue:$$$isMapped(gname)
 		continue:'..checkMasks(gname, mask)
-		w gname,!
 		
 		set gname = gname_".GBL"
 		set filename = ..filename(gname)
@@ -202,7 +201,7 @@ ClassMethod exportGlobals(mask = "") As %Status
 
 		set sc = ..fixXMLLine(gname, filename_".xml")
  	}
- 	return status
+ 	return sc
 }
 
 ClassMethod patch(filename = "", commitFrom = "", commitTo = "") As %Status
