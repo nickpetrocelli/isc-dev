@@ -4,7 +4,7 @@
 Class dev.code [ Abstract ]
 {
 
-Parameter version = "1.1.0.4";
+Parameter version = "1.1.0.5";
 
 /// export all available code
 ClassMethod export(mask = "", generated = 0, system = 0, percent = 0, mapped = 0, dfi = 0)
@@ -177,6 +177,32 @@ ClassMethod exportDeepSeeArtefacts() As %Status
 	}
 
 	return sc
+}
+
+ClassMethod exportGlobals(mask = "") As %Status
+{
+	#include %occInclude
+	set statement=##class(%SQL.Statement).%New()
+ 	set status=statement.%PrepareClassQuery("%SYS.GlobalQuery","NameSpaceListChui")
+ 	if $$$ISERR(status) { do $system.OBJ.DisplayError(status) }
+ 	set resultset=statement.%Execute($namespace)
+ 	while resultset.%Next() {
+   	 	set gname = resultset.%Get("Name")
+   	 	
+   	 	continue:$data(@("^"_gname))=0
+   	 	continue:$$$isGenerated(gname)
+	 	continue:$$$isPercented(gname)
+		continue:$$$isMapped(gname)
+		continue:'..checkMasks(gname, mask)
+		w gname,!
+		
+		set gname = gname_".GBL"
+		set filename = ..filename(gname)
+		do ..mkdir(gname)
+
+		set sc = ..fixXMLLine(gname, filename_".xml")
+ 	}
+ 	return status
 }
 
 ClassMethod patch(filename = "", commitFrom = "", commitTo = "") As %Status
