@@ -15,7 +15,7 @@ import the [release](https://github.com/intersystems-ru/cache-udl/releases) to t
 
 Map dev package to %All namespace to make it visible in any namespace.
 
-### Docker ###
+## Docker
 
 To install using Docker. Follow this instructions:
 
