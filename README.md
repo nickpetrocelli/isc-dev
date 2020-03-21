@@ -15,6 +15,27 @@ import the [release](https://github.com/intersystems-ru/cache-udl/releases) to t
 
 Map dev package to %All namespace to make it visible in any namespace.
 
+### Docker ###
+
+To install using Docker. Follow this instructions:
+
+Open terminal and clone the repo into any local directory
+
+```
+$ git clone https://github.com/intersystems-community/isc-dev.git
+```
+
+Open the terminal in this directory and run:
+
+```
+$ docker-compose build
+```
+
+Run the IRIS container with your project:
+```
+$ docker-compose up -d
+```
+
 # Usage
 
 ## Setup working directory ( optional )
