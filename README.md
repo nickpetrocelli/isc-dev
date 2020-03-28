@@ -1,6 +1,7 @@
 # ISC-DEV
 
 [![Gitter](https://img.shields.io/badge/chat-on%20telegram-blue.svg)](https://t.me/joinchat/FoZ4MxGETT0_VsVglVl0DA)
+[![Gitter](https://img.shields.io/static/v1?label=Vote%20for%20my%20App&message=InterSystems%20IRIS%20Contest&labelColor=%23333695&color=%2300b2a9)](https://openexchange.intersystems.com/contest/current)
 
 Export/Import source code (classes, macro, routines) and DeepSee artefacts(pivots, dashboards, termlists, pivot variables, shared measures) from and to InterSystems Data Platform products(Caché, Ensemble, IRIS). Support versions from 2016.2
 
@@ -14,6 +15,27 @@ or
 import the [release](https://github.com/intersystems-ru/cache-udl/releases) to the namespace.
 
 Map dev package to %All namespace to make it visible in any namespace.
+
+## Docker
+
+To install using Docker. Follow this instructions:
+
+Open terminal and clone the repo into any local directory
+
+```
+$ git clone https://github.com/intersystems-community/isc-dev.git
+```
+
+Open the terminal in this directory and run:
+
+```
+$ docker-compose build
+```
+
+Run the IRIS container with your project:
+```
+$ docker-compose up -d
+```
 
 # Usage
 
