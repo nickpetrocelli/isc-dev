@@ -4,7 +4,7 @@
 Class dev.code [ Abstract ]
 {
 
-Parameter version = "1.1.0.6";
+Parameter version = "1.2.0";
 
 /// export all available code
 ClassMethod export(mask = "", generated = 0, system = 0, percent = 0, mapped = 0, dfi = 0)
