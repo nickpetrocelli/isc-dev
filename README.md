@@ -43,14 +43,26 @@ $ docker-compose up -d
 ```
 NS> w ##class(dev.code).workdir("/path/to/your/working/directory/")
 ```
-## Export to working directory:
-```
-NS> d ##class(dev.code).export()
-```
+
 ## Import:
 ```
 NS> d ##class(dev.code).import()
 ```
+
+## Export to working directory:
+```
+NS> d ##class(dev.code).export()
+```
+
+## Рossible continuous export of files to the working directory
+Now the Classes/Rutines/DeepSee files will be automatically exported to the working directory after saving or compiling.
+
+How to enable this feature:
+
+- Go to Management Portal -> System Administration -> Configuration -> Additional Settings -> Source Control
+- Select the target namespace and set the `dev.FileManExtension` class as the main one and save it
+- Try to create a new class in the studio and save/compile it
+- Enjoy!
 
 ## Compile, Release and Patch:
 
