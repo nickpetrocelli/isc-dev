@@ -15,6 +15,14 @@ Method OnBeforeSave(InternalName As %String, Location As %String = "", Object As
 /// just saved. It can be use to export this documement to an external form for example.
 Method OnAfterSave(InternalName As %String, Object As %RegisteredObject = {$$$NULLOREF}) As %Status
 {
+	set ignorList = $lb("dev.code.CLS",
+						"dev.deepsee.CLS",
+						"dev.FileManExtension.CLS",
+						"dev.diff.gitHub.CLS",
+						"dev.diff.gitLocal.CLS",
+						"dev.diff.utils.CLS")
+	quit:$lf(ignorList, InternalName)=1 $$$OK
+						
 	set classAndRoutinesExts = $lb("cls","mac","int","inc")
 	
 	set ext = $zcvt($p(InternalName,".",*), "l")
