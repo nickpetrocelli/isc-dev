@@ -3,7 +3,8 @@
   <Document name="isc-dev.ZPM">
     <Module>
       <Name>isc-dev</Name>
-      <Version>1.3.0</Version>
+      <Version>1.4.0</Version>
+      <SourcesRoot>src</SourcesRoot>
       <Packaging>module</Packaging>
       <Resource Name="dev.PKG"/>
     </Module>
