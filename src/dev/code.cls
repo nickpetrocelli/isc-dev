@@ -1,10 +1,10 @@
 /// Export different types of modules in different subfolders in UDL (plain) format
 /// test.dfi -> /dfi/test.dfi
-/// testpkg.test.cls -> /cls/testpkg/test.cls
+/// testpkg.test.cls -> /testpkg/test.cls
 Class dev.code [ Abstract ]
 {
 
-Parameter version = "1.2.0";
+Parameter version = "1.4.0";
 
 /// export all available code
 ClassMethod export(mask = "", generated = 0, system = 0, percent = 0, mapped = 0, dfi = 0)
@@ -98,10 +98,47 @@ ClassMethod export(mask = "", generated = 0, system = 0, percent = 0, mapped = 0
 	set rs=""
 	
 	#;DeepSee artefacts
+	do ..exportCubes()
 	do ..exportDeepSeeArtefacts()
 	write !,!, "#; Exported to ", ..workdir()
 	
     return $$$OK
+}
+
+/// Export Cube Classes
+ClassMethod exportCubes() As %Status
+{
+	#define export(%code, %file) set sc = $system.OBJ.ExportUDL(%code, %file,"/diffexport") ##continue
+								 write:sc "Ok" do:'sc $system.OBJ.DisplayError(sc)
+	#define isMapped(%code) ##class(%RoutineMgr).IsMapped( %code )
+	#define isPercented(%code) ("%" = $e(%code))
+	#define isCube(%code) $classmethod(%code,"%Extends","%DeepSee.CubeDefinition")
+	
+	#define log write !, code, " -> ", $piece(filename,..workdir(),2), " "
+	
+	Set sc = $$$OK
+	#; classes
+	set rs = ##class(%ResultSet).%New("%Dictionary.ClassDefinition:Summary")
+	if rs.Execute() 
+	{
+		while rs.%Next()
+		{
+			set code = rs.Name _ ".cls", isSystem = rs.System
+			if isSystem continue
+			if $$$isPercented( code ) continue
+			if $$$isMapped( code )  continue
+			
+			if '($classmethod(rs.Name,"%Extends","%DeepSee.CubeDefinition")) continue
+			set filename = ..filename( code )
+			do ..mkdir( filename )
+			$$$log
+			$$$export( code, filename )
+		} 
+		set rs=""
+	}
+
+
+	Return sc
 }
 
 /// import all from workdir
@@ -382,8 +419,8 @@ ClassMethod filename(code)
 
 	set ext = $p( code, ".", * ), ext = $zcvt( ext, "l" )
 	#; for each type - different directory
-
-	set:ext'="" wd = ##class(%File).NormalizeDirectory( ext, wd )
+	#; except cls,int,inc,mac
+	if ext'="cls",ext'="mac",ext'="int",ext'="inc",ext'="" set wd = ##class(%File).NormalizeDirectory( ext, wd )
 
 	#; directory must exist before any call (%File).NormalizeFilename( , wd)
 	if '##class(%File).DirectoryExists( wd ) 
@@ -560,4 +597,3 @@ ClassMethod checkMasks(name As %String, masks As %String) As %Boolean
 }
 
 }
-
