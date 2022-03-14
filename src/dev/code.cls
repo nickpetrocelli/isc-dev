@@ -151,7 +151,7 @@ ClassMethod import(filemask = "*.xml;*.cls;*.mac;*.int;*.inc;*.dfi", qspec = "ck
 	
 	set sc = 1, dirs = "", dir = ..workdir() $$$push(dir)
 	if verbose write "#; Importing from ", dir,!
-	do ..setIgnore(.fm)
+	do ..setIgnore(.fm,verbose)
 	for 
 	{ 
 		$$$next(i,dir) quit:i=""  quit:dir=""
@@ -312,7 +312,7 @@ ClassMethod inFilter(ByRef filtermask, filename) As %Boolean
 
 /// get the filtermask for the repository.
 /// looks for .gitignore file and applies all the lines to filters
-ClassMethod setIgnore(ByRef filtermask)
+ClassMethod setIgnore(ByRef filtermask,verbose)
 {
 	// working with .gitignore file
 	// gitignore consists of masks of filtering files
@@ -454,7 +454,7 @@ ClassMethod importUpdated(filemask = "*.*", qspec = "cku-d", ByRef err = "", rec
 
 	set sc = 1, dirs = "", dir = ..workdir() $$$push(dir)
 	if verbose write "#; Importing updated from ", dir,!
-	do ..setIgnore(.fm)
+	do ..setIgnore(.fm,verbose)
 	for 
 	{ 
 		$$$next(i,dir) quit:i=""  quit:dir=""
