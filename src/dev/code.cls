@@ -226,7 +226,7 @@ ClassMethod exportGlobals(mask = "") As %Status
 	#include %occInclude
 	set statement=##class(%SQL.Statement).%New()
  	set sc=statement.%PrepareClassQuery("%SYS.GlobalQuery","NameSpaceListChui")
- 	if $$$ISERR(sc) { do $system.OBJ.DisplayError(status) }
+ 	if $$$ISERR(sc) { do $system.OBJ.DisplayError(sc) }
  	set resultset=statement.%Execute($namespace)
 	while resultset.%Next() 
 	{
