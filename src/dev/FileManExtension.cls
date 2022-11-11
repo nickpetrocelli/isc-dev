@@ -154,7 +154,7 @@ Method OnAfterDelete(InternalName As %String) As %Status
 	
 	set dir = ##class(%File).ParentDirectoryName(fileName)
 	
-	while dir '= ..workdir()
+	while dir '= ##class(dev.code).workdir()
 	{
 		set rs = ##class(%File).FileSetFunc(dir, , , 1)
 		quit:rs.%Next()=1

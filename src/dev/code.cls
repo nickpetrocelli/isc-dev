@@ -211,11 +211,17 @@ ClassMethod exportDeepSeeArtefacts() As %Status
 		set artefact = $list(artefacts,i)
 		continue:$data(@("^"_artefact))=0
 		
+		; 
 		set artefact = artefact_".GBL"
 		set filename = ..filename(artefact)
-		do ..mkdir(filename)
+		set filename=$p(filename,".GBL")
+		set fileglobalname=$p(filename,"gbl")_"gbl/"
+		set fileglobalname=fileglobalname_$tr($p($p(filename,"gbl",2),"/",2,*),"/",".")
+		;
+		;B "L"
+		;do ..mkdir(filename)
 
-		set sc = ..fixXMLLine(artefact, filename_".xml")
+		set sc = ..fixXMLLine(artefact, fileglobalname_".xml")
 	}
 
 	return sc
@@ -312,7 +318,7 @@ ClassMethod inFilter(ByRef filtermask, filename) As %Boolean
 
 /// get the filtermask for the repository.
 /// looks for .gitignore file and applies all the lines to filters
-ClassMethod setIgnore(ByRef filtermask,verbose)
+ClassMethod setIgnore(ByRef filtermask, verbose)
 {
 	// working with .gitignore file
 	// gitignore consists of masks of filtering files
