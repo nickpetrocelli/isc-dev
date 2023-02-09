@@ -55,6 +55,11 @@ NS> d ##class(dev.code).import()
 NS> d ##class(dev.code).export()
 ```
 
+####  Method to export all cubes, source classes, dashboards, pivots and globals from the namespace available to the current user:
+```
+NS> d ##class(dev.code).exportBI()
+```
+
 ## Рossible continuous export of files to the working directory
 Now the Classes/Rutines/DeepSee files will be automatically exported to the working directory after saving or compiling.
 
