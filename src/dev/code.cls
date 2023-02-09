@@ -99,10 +99,24 @@ ClassMethod export(mask = "", generated = 0, system = 0, percent = 0, mapped = 0
 	
 	#;DeepSee artefacts
 	do ..exportCubes()
-	do ..exportDeepSeeArtefacts()
+	do ##class(dev.bi).exportDeepSeeArtefacts()
 	write !,!, "#; Exported to ", ..workdir()
 	
     return $$$OK
+}
+
+/// Method to export all cubes, source cube classes, dashboards, 
+/// pivots and globals from the namespace available to the current user
+/// do ##class(dev.code).exportBI()
+ClassMethod exportBI() As %Status
+{
+	do ##class(dev.bi).exportCubes()
+	do ##class(dev.bi).exportKPIs()
+	do ##class(dev.bi).exportDashboards()
+	do ##class(dev.bi).exportPivots()
+	do ##class(dev.bi).exportDeepSeeArtefacts()
+	
+	return $$$OK
 }
 
 /// Export Cube Classes
@@ -412,6 +426,7 @@ ClassMethod compile()
 /// test.cls -> /cls/test.cls
 /// testpkg.test.cls -> /cls/testpkg/test.cls
 /// etc
+/// w ##class(dev.code).filename()
 ClassMethod filename(code)
 {
 	#define log(%dir,%sc) w !, "mkdir ", %dir, " ", sc
@@ -424,21 +439,31 @@ ClassMethod filename(code)
 	}
 
 	set ext = $p( code, ".", * ), ext = $zcvt( ext, "l" )
-	#; for each type - different directory
-	#; except cls,int,inc,mac
-	if ext'="cls",ext'="mac",ext'="int",ext'="inc",ext'="" set wd = ##class(%File).NormalizeDirectory( ext, wd )
 
-	#; directory must exist before any call (%File).NormalizeFilename( , wd)
+	// for each type - different directory
+	set extensions = $lb("cls","int","inc","mac","dfi","gbl")
+	if ($lf(extensions, ext)>0)
+	{
+		set wd = ##class(%File).NormalizeDirectory( ext, wd )
+	}
+	elseif ext '= ""
+	{
+		set wd = ##class(%File).NormalizeDirectory( "other", wd )
+	}
+	
+	// directory must exist before any call (%File).NormalizeFilename( , wd)
 	if '##class(%File).DirectoryExists( wd ) 
 	{
 		set sc = ##class(%File).CreateDirectoryChain( wd )
 		$$$log(wd,sc)
 	}
+	
 
 	set filename = ##class(%File).NormalizeFilename( code, wd )
-	#; lowercase file extension
+	
+	// lowercase file extension
 	set $p(filename,".",*)=ext
-	//B:code="DPRep.Rest.JSON.cls" "L"
+	
 	#; for *.cls Package.Subpackage.ClassName.cls -> Folder/Subfolder/ClassName.cls
 	if (ext="cls") || (ext="gbl") 
 	{
