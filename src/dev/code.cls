@@ -441,23 +441,18 @@ ClassMethod filename(code)
 	set ext = $p( code, ".", * ), ext = $zcvt( ext, "l" )
 
 	// for each type - different directory
-	set extensions = $lb("cls","int","inc","mac","dfi","gbl")
+	set extensions = $lb("int","inc","mac","dfi","gbl")
 	if ($lf(extensions, ext)>0)
 	{
 		set wd = ##class(%File).NormalizeDirectory( ext, wd )
 	}
-	elseif ext '= ""
-	{
-		set wd = ##class(%File).NormalizeDirectory( "other", wd )
-	}
-	
+
 	// directory must exist before any call (%File).NormalizeFilename( , wd)
 	if '##class(%File).DirectoryExists( wd ) 
 	{
 		set sc = ##class(%File).CreateDirectoryChain( wd )
 		$$$log(wd,sc)
 	}
-	
 
 	set filename = ##class(%File).NormalizeFilename( code, wd )
 	
@@ -465,7 +460,7 @@ ClassMethod filename(code)
 	set $p(filename,".",*)=ext
 	
 	#; for *.cls Package.Subpackage.ClassName.cls -> Folder/Subfolder/ClassName.cls
-	if (ext="cls") || (ext="gbl") 
+	if (ext="cls")
 	{
 		set dirs = $piece( code, ".",1, *-2 ), dirs = $translate( dirs, ".", "/" )
 		set relpath = dirs _ "/" _ $piece( code, ".", *-1, * ) ;
