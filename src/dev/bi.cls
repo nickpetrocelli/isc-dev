@@ -110,7 +110,7 @@ ClassMethod exportDFIinXML(itemName As %String) As %Status
 	return $$$OK
 }
 
-/// do ##class(dev.code).exportDeepSeeArtefacts()
+/// do ##class(dev.bi).exportDeepSeeArtefacts()
 ClassMethod exportDeepSeeArtefacts() As %Status
 {
 	set sc = $$$OK
@@ -124,6 +124,9 @@ ClassMethod exportDeepSeeArtefacts() As %Status
 		set artefact = artefact_".GBL"
 		set filename = ##class(dev.code).filename(artefact)
 		do ##class(dev.code).mkdir(filename)
+
+		//without .gbl in the file name
+		set filename = $e(filename,1, *-4)
 
 		set sc = ..exportXML(artefact, filename_".xml")
 	}
@@ -147,7 +150,7 @@ ClassMethod fixDashIntoName()
     kill rs
 }
 
-/// do ##class(dev.code).exportXML()
+/// do ##class(dev.bi).exportXML()
 ClassMethod exportXML(documentName, filename) As %Status
 {
 	set stream = ##class(%Stream.FileBinary).%New()
