@@ -78,6 +78,32 @@ ClassMethod exportPivots() As %Status
 	return $$$OK
 }
 
+/// do ##class(dev.bi).checkAllPivots()
+ClassMethod checkAllPivots() As %Status
+{
+	
+	set sc = ##class(%DeepSee.Utils).%GetPivotList(.listOfPivots)
+	
+	set key = $order(listOfPivots(""))
+	
+	while (key'="")
+	{
+		do ..checkPivot(key)
+		set key = $order(listOfPivots(key))
+	}
+
+	return $$$OK
+}
+
+/// do ##class(dev.bi).checkPivot()
+ClassMethod checkPivot(pivotFullName, debug = 1) As %Status
+{
+	do ##class(%DeepSee.Utils).%GetResultSetFromPivot(pivotFullName, .sc,1, .pParms)
+	w:debug "Pivot: "_pivotFullName,!
+	w:debug "Status: "_$system.Status.DisplayError(sc),!
+	return sc
+}
+
 ClassMethod getSourceClass(pCubeName As %String) As %String
 {
   Quit $G(^DeepSee.Cubes("cubes",$$$UPPER(pCubeName),"sourceClass"))
