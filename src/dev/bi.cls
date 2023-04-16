@@ -103,7 +103,7 @@ ClassMethod exportDFIinXML(itemName As %String) As %Status
 	
 	write !, itemName, " -> ", $piece(filename,##class(dev.code).workdir(),2), " "
 	
-	set documentName = $replace(filename,"/","-")
+	set documentName = $replace(itemName,"/","-")
 	set filename = $extract(filename,1,*-4)
 	do ..exportXML(documentName,filename_".xml")
 	

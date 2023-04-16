@@ -215,32 +215,6 @@ ClassMethod import(filemask = "*.xml;*.cls;*.mac;*.int;*.inc;*.dfi", qspec = "ck
 	return sc
 }
 
-ClassMethod exportDeepSeeArtefacts() As %Status
-{
-	set sc = $$$OK
-	set artefacts = $listbuild("DeepSee.Variables","DeepSee.TermList","DeepSee.CalcMbrs")
-	
-	for i=1:1:$listlength(artefacts)
-	{
-		set artefact = $list(artefacts,i)
-		continue:$data(@("^"_artefact))=0
-		
-		; 
-		set artefact = artefact_".GBL"
-		set filename = ..filename(artefact)
-		set filename=$p(filename,".GBL")
-		set fileglobalname=$p(filename,"gbl")_"gbl/"
-		set fileglobalname=fileglobalname_$tr($p($p(filename,"gbl",2),"/",2,*),"/",".")
-		;
-		;B "L"
-		;do ..mkdir(filename)
-
-		set sc = ..fixXMLLine(artefact, fileglobalname_".xml")
-	}
-
-	return sc
-}
-
 ClassMethod exportGlobals(mask = "") As %Status
 {
 	#include %occInclude
