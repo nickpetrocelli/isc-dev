@@ -104,6 +104,73 @@ ClassMethod checkPivot(pivotFullName, debug = 1) As %Status
 	return sc
 }
 
+/// do ##class(dev.bi).checkDashboards()
+ClassMethod checkDashboards() As %Status
+{
+	set sc = ##class(%DeepSee.Utils).%GetDashboardList(.listOfDashboards)
+	
+	set key = $order(listOfDashboards(""))
+	
+	while (key'="")
+	{
+		do ..checkDashboard(key)
+		set key = $order(listOfDashboards(key))
+	}
+
+	return $$$OK
+}
+
+/// do ##class(dev.bi).checkDashboard("Basic Dashboard Demo.dashboard")
+ClassMethod checkDashboard(dashboardName) As %Status
+{
+	Set dashboard = ##class(%DeepSee.Dashboard.Utils).%OpenDashboard(dashboardName,.tSC)
+	for i=1:1:dashboard.widgets.Count() 
+	{
+		set widget = dashboard.widgets.GetAt(i)
+		set pivotFullName= widget.dataSource
+
+		set cubeName = ..getCubeNameByPivot(pivotFullName)
+		w !,"Cube name: "_cubeName,!
+		w "Pivot name: "_ pivotFullName,!
+		set pivotSC = ..checkPivot(pivotFullName,0)
+		
+		if $$$ISERR(pivotSC)
+		{
+			w "Pivot status: ",$system.Status.GetErrorText(pivotSC),!!
+		}
+		else
+		{
+			w "Pivot status: OK!",!!
+		}
+
+		for j=1:1:widget.controls.Count()
+		{
+			set control = widget.controls.GetAt(j)
+			set action = control.action
+			set targetProperty = control.targetProperty
+			set label = control.label
+			
+			if (action = "setFilter") || (action = "applyFilter")
+			{
+				set sc = ##class(%DeepSee.Utils).%GetDimensionInfo(cubeName, targetProperty)
+				set error = $system.Status.GetErrorText(sc)
+				w "Filter name: "_label,!
+				w "Status: "_$s($$$ISERR(sc): error,1: "OK!"),!
+			}
+		}
+	}
+ 	return $$$OK
+}
+
+ClassMethod getCubeNameByPivot(pivotFullName) As %String
+{
+	set mdx = ##class(%DeepSee.Utils).%GetMDXFromPivot(pivotFullName,,0)
+	set cubeName = $p(mdx," FROM ", 2)
+	set cubeName = $replace(cubeName,"[","")
+	set cubeName = $replace(cubeName,"]","")
+	return cubeName
+}
+
 ClassMethod getSourceClass(pCubeName As %String) As %String
 {
   Quit $G(^DeepSee.Cubes("cubes",$$$UPPER(pCubeName),"sourceClass"))
