@@ -79,8 +79,10 @@ ClassMethod exportPivots() As %Status
 }
 
 /// do ##class(dev.bi).checkAllPivots()
-ClassMethod checkAllPivots() As %Status
+ClassMethod checkAllPivots(stopOnError As %Boolean = 0) As %Status
 {
+	set countOfPivots = 0
+	set countOfErrors = 0
 	
 	set sc = ##class(%DeepSee.Utils).%GetPivotList(.listOfPivots)
 	
@@ -88,9 +90,16 @@ ClassMethod checkAllPivots() As %Status
 	
 	while (key'="")
 	{
-		do ..checkPivot(key)
+		set sc = ..checkPivot(key)
+		
+		set countOfPivots = countOfPivots + 1
+		set:$$$ISERR(sc) countOfErrors = countOfErrors + 1
+		quit:$$$ISERR(sc)&&stopOnError 
 		set key = $order(listOfPivots(key))
 	}
+	
+	w !,"Pivots tested: "_countOfPivots,!
+	w "Errors: "_countOfErrors
 
 	return $$$OK
 }
@@ -105,38 +114,56 @@ ClassMethod checkPivot(pivotFullName, debug = 1) As %Status
 }
 
 /// do ##class(dev.bi).checkDashboards()
-ClassMethod checkDashboards() As %Status
+ClassMethod checkDashboards(stopOnError As %Boolean = 0) As %Status
 {
+	set countOfDashboards = 0
+	set countOfPivots = 0
+	set countOfPitotErrors = 0
+	set countOfControlErrors = 0
+	
 	set sc = ##class(%DeepSee.Utils).%GetDashboardList(.listOfDashboards)
 	
 	set key = $order(listOfDashboards(""))
 	
 	while (key'="")
 	{
-		do ..checkDashboard(key)
+		w !,"Dashboard name: "_key,!
+		do ..checkDashboard(key, .countOfPivots, .countOfPitotErrors, .countOfControlErrors, .scStop)
+		
+		set countOfDashboards = countOfDashboards + 1
+		quit:scStop&&stopOnError
 		set key = $order(listOfDashboards(key))
 	}
+	
+	w !,"Dashboards tested: "_countOfDashboards,!
+	w "Pivots tested: "_countOfPivots,!
+	w "Pivots errors: "_countOfPitotErrors,!
+	w "Filters errors: "_countOfControlErrors,!
 
 	return $$$OK
 }
 
 /// do ##class(dev.bi).checkDashboard("Basic Dashboard Demo.dashboard")
-ClassMethod checkDashboard(dashboardName) As %Status
+ClassMethod checkDashboard(dashboardName, ByRef countOfPivots, ByRef countOfPitotErrors, ByRef countOfControlErrors, ByRef scStop) As %Status
 {
 	Set dashboard = ##class(%DeepSee.Dashboard.Utils).%OpenDashboard(dashboardName,.tSC)
 	for i=1:1:dashboard.widgets.Count() 
 	{
 		set widget = dashboard.widgets.GetAt(i)
 		set pivotFullName= widget.dataSource
-
+		
+		set countOfPivots = countOfPivots + 1
+		
 		set cubeName = ..getCubeNameByPivot(pivotFullName)
-		w !,"Cube name: "_cubeName,!
+		w "Cube name: "_cubeName,!
 		w "Pivot name: "_ pivotFullName,!
 		set pivotSC = ..checkPivot(pivotFullName,0)
 		
 		if $$$ISERR(pivotSC)
 		{
 			w "Pivot status: ",$system.Status.GetErrorText(pivotSC),!!
+			set countOfPitotErrors = countOfPitotErrors + 1
+			set scStop = 1
 		}
 		else
 		{
@@ -152,10 +179,20 @@ ClassMethod checkDashboard(dashboardName) As %Status
 			
 			if (action = "setFilter") || (action = "applyFilter")
 			{
-				set sc = ##class(%DeepSee.Utils).%GetDimensionInfo(cubeName, targetProperty)
-				set error = $system.Status.GetErrorText(sc)
+				set controlSc = ##class(%DeepSee.Utils).%GetDimensionInfo(cubeName, targetProperty)
 				w "Filter name: "_label,!
-				w "Status: "_$s($$$ISERR(sc): error,1: "OK!"),!
+				
+				if $$$ISERR(controlSc)
+				{
+					set error = $system.Status.GetErrorText(controlSc)
+					w "Status: "_error,!
+					set countOfControlErrors = countOfControlErrors + 1
+					set scStop = 1
+				}
+				else
+				{
+					w "Status: OK!",!
+				}
 			}
 		}
 	}
@@ -165,9 +202,10 @@ ClassMethod checkDashboard(dashboardName) As %Status
 ClassMethod getCubeNameByPivot(pivotFullName) As %String
 {
 	set mdx = ##class(%DeepSee.Utils).%GetMDXFromPivot(pivotFullName,,0)
-	set cubeName = $p(mdx," FROM ", 2)
-	set cubeName = $replace(cubeName,"[","")
-	set cubeName = $replace(cubeName,"]","")
+
+	set cubeName = $p(mdx," FROM [", 2)
+	set cubeName = $p(cubeName,"]", 1)
+
 	return cubeName
 }
 
