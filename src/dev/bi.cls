@@ -120,6 +120,7 @@ ClassMethod checkDashboards(stopOnError As %Boolean = 0) As %Status
 	set countOfPivots = 0
 	set countOfPitotErrors = 0
 	set countOfControlErrors = 0
+	set scStop = 0
 	
 	set sc = ##class(%DeepSee.Utils).%GetDashboardList(.listOfDashboards)
 	
@@ -144,7 +145,7 @@ ClassMethod checkDashboards(stopOnError As %Boolean = 0) As %Status
 }
 
 /// do ##class(dev.bi).checkDashboard("Basic Dashboard Demo.dashboard")
-ClassMethod checkDashboard(dashboardName, ByRef countOfPivots, ByRef countOfPitotErrors, ByRef countOfControlErrors, ByRef scStop) As %Status
+ClassMethod checkDashboard(dashboardName, ByRef countOfPivots, ByRef countOfPitotErrors, ByRef countOfControlErrors, ByRef scStop = 0) As %Status
 {
 	Set dashboard = ##class(%DeepSee.Dashboard.Utils).%OpenDashboard(dashboardName,.tSC)
 	for i=1:1:dashboard.widgets.Count() 
