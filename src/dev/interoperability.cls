@@ -3,10 +3,10 @@
 Class dev.interoperability
 {
 
-Query LUT() As %SQLQuery
-{
-SELECT DISTINCT TableName FROM Ens_Util.LookupTable
-}
+// Query LUT() As %SQLQuery
+// {
+// SELECT DISTINCT TableName FROM Ens_Util.LookupTable
+// }
 
 /// Export Lookup Tables into dir
 /// 
@@ -14,7 +14,12 @@ SELECT DISTINCT TableName FROM Ens_Util.LookupTable
 ClassMethod ExportLUT(dir)
 {
 	set dir = ##class(%File).NormalizeDirectory(dir)
-	set rs = ..LUTFunc()
+
+	set sql = "SELECT DISTINCT TableName FROM Ens_Util.LookupTable"
+	set rs = ##class(%SQL.Statement).%ExecDirect(, sql)
+	if rs.%SQLCODE '=0 quit ""
+	//set rs = ..LUTFunc()
+
 	while rs.%Next() {
 		set lut = rs.TableName
 		/// LUTs are guaranteed to have distinct names

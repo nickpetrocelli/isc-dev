@@ -12,3 +12,4 @@ services:
       - 53773
     volumes:
       - ./:/irisrun/repo
+      - ~/iris.key:/usr/irissys/mgr/iris.key
