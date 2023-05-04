@@ -128,7 +128,6 @@ ClassMethod checkDashboards(stopOnError As %Boolean = 0) As %Status
 	
 	while (key'="")
 	{
-		w !,"Dashboard name: "_key,!
 		do ..checkDashboard(key, .countOfPivots, .countOfPitotErrors, .countOfControlErrors, .scStop)
 		
 		set countOfDashboards = countOfDashboards + 1
@@ -145,17 +144,24 @@ ClassMethod checkDashboards(stopOnError As %Boolean = 0) As %Status
 }
 
 /// do ##class(dev.bi).checkDashboard("Basic Dashboard Demo.dashboard")
-ClassMethod checkDashboard(dashboardName, ByRef countOfPivots, ByRef countOfPitotErrors, ByRef countOfControlErrors, ByRef scStop = 0) As %Status
+ClassMethod checkDashboard(dashboardName, ByRef countOfPivots = 0, ByRef countOfPitotErrors = 0, ByRef countOfControlErrors = 0, ByRef scStop = 0) As %Status
 {
 	Set dashboard = ##class(%DeepSee.Dashboard.Utils).%OpenDashboard(dashboardName,.tSC)
+	set wDashName = 1
 	for i=1:1:dashboard.widgets.Count() 
 	{
 		set widget = dashboard.widgets.GetAt(i)
 		set pivotFullName= widget.dataSource
 		
+		continue:$$$LOWER($E(pivotFullName,*-3,*))=".kpi"
+
 		set countOfPivots = countOfPivots + 1
 		
 		set cubeName = ..getCubeNameByPivot(pivotFullName)
+		
+		w:wDashName !,"Dashboard name: "_dashboardName,!
+		set wDashName = 0
+
 		w "Cube name: "_cubeName,!
 		w "Pivot name: "_ pivotFullName,!
 		set pivotSC = ..checkPivot(pivotFullName,0)
