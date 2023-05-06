@@ -4,19 +4,19 @@ Class dev.bi
 /// do ##class(dev.bi).exportCubes()
 ClassMethod exportCubes() As %Status
 {
-				 					 
+
 	set sc = ##class(%DeepSee.Utils).%GetCubeList(.listOfCubes,"cubes")
-	
+
 	set key = $order(listOfCubes(""))
-	
+
 	while (key'="")
 	{
 		set cubeClassName = ##class(%DeepSee.Utils).%GetCubeClass(key)
 		set cubeSourceClassName = ..getSourceClass(key)
-		
+
 		do ..exportUDL(cubeClassName_".cls")
 		do ..exportUDL(cubeSourceClassName_".cls")
-		
+
 		set key = $order(listOfCubes(key))
 	}
 
@@ -26,15 +26,15 @@ ClassMethod exportCubes() As %Status
 /// do ##class(dev.bi).exportKPIs()
 ClassMethod exportKPIs() As %Status
 {
-	
+
 	set sc = ##class(%DeepSee.Utils).%GetKPIList(.listOfKPIs)
-	
+
 	set key = $order(listOfKPIs(""))
-	
+
 	while (key'="")
 	{
 		set kpiClassName = ##class(%DeepSee.Utils).%GetKPIClass(key)
-		
+
 		do ..exportUDL(kpiClassName_".cls")
 		set key = $order(listOfKPIs(key))
 	}
@@ -46,11 +46,11 @@ ClassMethod exportKPIs() As %Status
 ClassMethod exportDashboards() As %Status
 {
 	do ..fixDashIntoName()
-	
+
 	set sc = ##class(%DeepSee.Utils).%GetDashboardList(.listOfDashboards)
-	
+
 	set key = $order(listOfDashboards(""))
-	
+
 	while (key'="")
 	{
 		do ..exportDFIinXML(key_".DFI")
@@ -64,11 +64,11 @@ ClassMethod exportDashboards() As %Status
 ClassMethod exportPivots() As %Status
 {
 	do ..fixDashIntoName()
-	
+
 	set sc = ##class(%DeepSee.Utils).%GetPivotList(.listOfPivots)
-	
+
 	set key = $order(listOfPivots(""))
-	
+
 	while (key'="")
 	{
 		do ..exportDFIinXML(key_".DFI")
@@ -83,25 +83,28 @@ ClassMethod checkAllPivots(stopOnError As %Boolean = 0) As %Status
 {
 	set countOfPivots = 0
 	set countOfErrors = 0
-	
+
 	set sc = ##class(%DeepSee.Utils).%GetPivotList(.listOfPivots)
-	
+
 	set key = $order(listOfPivots(""))
-	
+
 	while (key'="")
 	{
 		set sc = ..checkPivot(key)
-		
+
 		set countOfPivots = countOfPivots + 1
 		set:$$$ISERR(sc) countOfErrors = countOfErrors + 1
-		quit:$$$ISERR(sc)&&stopOnError 
+		quit:$$$ISERR(sc)&&stopOnError
 		set key = $order(listOfPivots(key))
 	}
-	
+
 	w !,"Pivots tested: "_countOfPivots,!
 	w "Errors: "_countOfErrors
 
-	return $$$OK
+	if countOfErrors {
+		set sc=$$$ERROR($$$GeneralError, "Found "_countOfErrors_" errors in pivots in "_$namespace_" namespace")
+	}
+	return sc
 }
 
 /// do ##class(dev.bi).checkPivot()
@@ -121,51 +124,67 @@ ClassMethod checkDashboards(stopOnError As %Boolean = 0) As %Status
 	set countOfPitotErrors = 0
 	set countOfControlErrors = 0
 	set scStop = 0
-	
+
 	set sc = ##class(%DeepSee.Utils).%GetDashboardList(.listOfDashboards)
-	
+
 	set key = $order(listOfDashboards(""))
-	
+
 	while (key'="")
 	{
 		do ..checkDashboard(key, .countOfPivots, .countOfPitotErrors, .countOfControlErrors, .scStop)
-		
+
 		set countOfDashboards = countOfDashboards + 1
 		quit:scStop&&stopOnError
 		set key = $order(listOfDashboards(key))
 	}
-	
+
 	w !,"Dashboards tested: "_countOfDashboards,!
 	w "Pivots tested: "_countOfPivots,!
 	w "Pivots errors: "_countOfPitotErrors,!
 	w "Filters errors: "_countOfControlErrors,!
 
-	return $$$OK
+	if countOfPitotErrors {
+		set sc=$$$ERROR($$$GeneralError, "Found "_countOfPitotErrors_" errors in pivots in "_$namespace_" namespace")
+	}
+	if countOfControlErrors {
+		set sc=$SYSTEM.Status.AppendStatus(sc,$$$ADDERR($$$GeneralError, "Found "_countOfControlErrors_" errors in filters in "_$namespace_" namespace"))
+	}
+	return sc
 }
 
 /// do ##class(dev.bi).checkDashboard("Basic Dashboard Demo.dashboard")
 ClassMethod checkDashboard(dashboardName, ByRef countOfPivots = 0, ByRef countOfPitotErrors = 0, ByRef countOfControlErrors = 0, ByRef scStop = 0) As %Status
 {
 	Set dashboard = ##class(%DeepSee.Dashboard.Utils).%OpenDashboard(dashboardName,.tSC)
-	set wDashName = 1
-	for i=1:1:dashboard.widgets.Count() 
+	w !,"Dashboard name: "_dashboardName,!
+	;set wDashName = 1
+	for i=1:1:dashboard.widgets.Count()
 	{
 		set widget = dashboard.widgets.GetAt(i)
 		set pivotFullName= widget.dataSource
-		
-		continue:$$$LOWER($E(pivotFullName,*-3,*))=".kpi"
+		w "Widget name: "_widget.name,!
+
+		if $$$LOWER($E(pivotFullName,*-3,*))=".kpi" {
+			w "The datasource is KPI, tests are not supported for now skip",!
+			continue
+		}
+
+		if pivotFullName="" {
+			w "The datasource is empty, skip",!
+			continue
+		}
 
 		set countOfPivots = countOfPivots + 1
-		
+
 		set cubeName = ..getCubeNameByPivot(pivotFullName)
-		
-		w:wDashName !,"Dashboard name: "_dashboardName,!
-		set wDashName = 0
+
+		#; w:wDashName !,"Dashboard name: "_dashboardName,!
+		#; set wDashName = 0
 
 		w "Cube name: "_cubeName,!
 		w "Pivot name: "_ pivotFullName,!
 		set pivotSC = ..checkPivot(pivotFullName,0)
-		
+
 		if $$$ISERR(pivotSC)
 		{
 			w "Pivot status: ",$system.Status.GetErrorText(pivotSC),!!
@@ -183,12 +202,12 @@ ClassMethod checkDashboard(dashboardName, ByRef countOfPivots = 0, ByRef countOf
 			set action = control.action
 			set targetProperty = control.targetProperty
 			set label = control.label
-			
+
 			if (action = "setFilter") || (action = "applyFilter")
 			{
 				set controlSc = ##class(%DeepSee.Utils).%GetDimensionInfo(cubeName, targetProperty)
 				w "Filter name: "_label,!
-				
+
 				if $$$ISERR(controlSc)
 				{
 					set error = $system.Status.GetErrorText(controlSc)
@@ -225,12 +244,12 @@ ClassMethod exportUDL(itemName As %String) As %Status
 {
 	set filename = ##class(dev.code).filename(itemName)
 	do ##class(dev.code).mkdir( filename )
-	
+
 	write !, itemName, " -> ", $piece(filename,##class(dev.code).workdir(),2), " "
-	
-	set sc = $system.OBJ.ExportUDL(itemName, filename,"/diffexport") 
+
+	set sc = $system.OBJ.ExportUDL(itemName, filename,"/diffexport")
 	write:sc "Ok" do:'sc $system.OBJ.DisplayError(sc)
-	
+
 	return sc
 }
 
@@ -238,13 +257,13 @@ ClassMethod exportDFIinXML(itemName As %String) As %Status
 {
 	set filename = ##class(dev.code).filename(itemName)
 	do ##class(dev.code).mkdir( filename )
-	
+
 	write !, itemName, " -> ", $piece(filename,##class(dev.code).workdir(),2), " "
-	
+
 	set documentName = $replace(itemName,"/","-")
 	set filename = $extract(filename,1,*-4)
 	do ..exportXML(documentName,filename_".xml")
-	
+
 	return $$$OK
 }
 
@@ -253,12 +272,12 @@ ClassMethod exportDeepSeeArtefacts() As %Status
 {
 	set sc = $$$OK
 	set artefacts = $listbuild("DeepSee.Variables","DeepSee.TermList","DeepSee.CalcMbrs")
-	
+
 	for i=1:1:$listlength(artefacts)
 	{
 		set artefact = $list(artefacts,i)
 		continue:$data(@("^"_artefact))=0
-		
+
 		set artefact = artefact_".GBL"
 		set filename = ##class(dev.code).filename(artefact)
 		do ##class(dev.code).mkdir(filename)
@@ -298,7 +317,7 @@ ClassMethod exportXML(documentName, filename) As %Status
 	set matcher=##class(%Regex.Matcher).%New("<Export generator=.+>")
 	set matcher.Text = stream.Read(stream.Size)
 	set data = matcher.ReplaceFirst("<Export generator=""Cache"">")
-	
+
 	do stream.Clear()
 	do stream.Write(data)
 	return stream.%Save()
