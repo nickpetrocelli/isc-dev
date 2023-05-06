@@ -155,7 +155,14 @@ ClassMethod checkDashboards(stopOnError As %Boolean = 0) As %Status
 /// do ##class(dev.bi).checkDashboard("Basic Dashboard Demo.dashboard")
 ClassMethod checkDashboard(dashboardName, ByRef countOfPivots = 0, ByRef countOfPitotErrors = 0, ByRef countOfControlErrors = 0, ByRef scStop = 0) As %Status
 {
-	Set dashboard = ##class(%DeepSee.Dashboard.Utils).%OpenDashboard(dashboardName,.tSC)
+	set dashboard = ##class(%DeepSee.Dashboard.Utils).%OpenDashboard(dashboardName,.tSC)
+	
+	if '$isObject(dashboard)
+	{
+		w !,"Dashboard "_dashboardName_" does not exist.",!
+		return $$$OK
+	}
+
 	w !,"Dashboard name: "_dashboardName,!
 	;set wDashName = 1
 	for i=1:1:dashboard.widgets.Count()
