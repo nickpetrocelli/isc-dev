@@ -147,7 +147,7 @@ ClassMethod checkDashboards(stopOnError As %Boolean = 0) As %Status
 		set sc=$$$ERROR($$$GeneralError, "Found "_countOfPitotErrors_" errors in pivots in "_$namespace_" namespace")
 	}
 	if countOfControlErrors {
-		set sc=$SYSTEM.Status.AppendStatus(sc,$$$ADDERR($$$GeneralError, "Found "_countOfControlErrors_" errors in filters in "_$namespace_" namespace"))
+		set sc=$SYSTEM.Status.AppendStatus(sc,$$$ERROR($$$GeneralError, "Found "_countOfControlErrors_" errors in filters in "_$namespace_" namespace"))
 	}
 	return sc
 }
