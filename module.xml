@@ -3,7 +3,7 @@
   <Document name="isc-dev.ZPM">
     <Module>
       <Name>isc-dev</Name>
-      <Version>1.4.20</Version>
+      <Version>1.4.21</Version>
       <Description>Export/Import InterSystems Data Platform development artefacts</Description>
       <SourcesRoot>src</SourcesRoot>
       <Packaging>module</Packaging>
