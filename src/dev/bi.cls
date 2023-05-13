@@ -79,7 +79,7 @@ ClassMethod exportPivots() As %Status
 }
 
 /// do ##class(dev.bi).checkAllPivots()
-ClassMethod checkAllPivots(stopOnError As %Boolean = 0) As %Status
+ClassMethod checkPivots(stopOnError As %Boolean = 0) As %Status
 {
 	set countOfPivots = 0
 	set countOfErrors = 0
