@@ -83,23 +83,36 @@ ClassMethod checkPivots(stopOnError As %Boolean = 0) As %Status
 {
 	set countOfPivots = 0
 	set countOfErrors = 0
-
+	
 	set sc = ##class(%DeepSee.Utils).%GetPivotList(.listOfPivots)
 
 	set key = $order(listOfPivots(""))
-
+	set errorList = ""
+	
 	while (key'="")
 	{
-		set sc = ..checkPivot(key)
+		set sc = ..checkPivot(key,,.errors)
 
 		set countOfPivots = countOfPivots + 1
 		set:$$$ISERR(sc) countOfErrors = countOfErrors + 1
 		quit:$$$ISERR(sc)&&stopOnError
 		set key = $order(listOfPivots(key))
+		// sometimes errors is empty 
+		if errors '= ""
+		{
+			set errorList = errorList _ $lb(errors, key)
+		}	
 	}
-
+	// going through list with pivots and errors
+	w !, "Pivot errors and pivots summary"
+	set ptr=0
+	while $listnext(errorList,ptr,error) {
+          w !,error	  
+    }
+	
 	w !,"Pivots tested: "_countOfPivots,!
-	w "Errors: "_countOfErrors
+	w !,"Errors: "_countOfErrors, !
+	
 
 	if countOfErrors {
 		set sc=$$$ERROR($$$GeneralError, "Found "_countOfErrors_" errors in pivots in "_$namespace_" namespace")
@@ -108,11 +121,12 @@ ClassMethod checkPivots(stopOnError As %Boolean = 0) As %Status
 }
 
 /// do ##class(dev.bi).checkPivot()
-ClassMethod checkPivot(pivotFullName, debug = 1) As %Status
+ClassMethod checkPivot(pivotFullName, debug = 1, ByRef errors) As %Status
 {
 	do ##class(%DeepSee.Utils).%GetResultSetFromPivot(pivotFullName, .sc,1, .pParms)
 	w:debug "Pivot: "_pivotFullName,!
 	w:debug "Status: "_$system.Status.DisplayError(sc),!
+	set errors = $system.Status.GetErrorText(sc)
 	return sc
 }
 
@@ -124,20 +138,41 @@ ClassMethod checkDashboards(stopOnError As %Boolean = 0) As %Status
 	set countOfPitotErrors = 0
 	set countOfControlErrors = 0
 	set scStop = 0
-
+	
 	set sc = ##class(%DeepSee.Utils).%GetDashboardList(.listOfDashboards)
 
 	set key = $order(listOfDashboards(""))
-
+	set dashErrors = ""
+	set controlErrors = ""
 	while (key'="")
 	{
-		do ..checkDashboard(key, .countOfPivots, .countOfPitotErrors, .countOfControlErrors, .scStop)
-
+		set st = ..checkDashboard(key, .countOfPivots, .countOfPitotErrors, .countOfControlErrors, .scStop, .pivotsError, .controlError)
 		set countOfDashboards = countOfDashboards + 1
 		quit:scStop&&stopOnError
 		set key = $order(listOfDashboards(key))
+		if pivotsError '= ""
+		{
+			set dashErrors = dashErrors _ $lb(pivotsError, key)
+		}
+		if controlError '= ""
+		{
+			set controlErrors = controlErrors _ $lb(controlError, key)
+		}
+		
+		
 	}
+	w !, "Pivot errors and dashboard summary"
+	set ptr=0
+	while $listnext(dashErrors,ptr,error) {
+          w !,error	  
+    }
+	w !
+	w !, "Control errors and dashboard summary"
+	while $listnext(controlErrors,ptr,Controlerror) {
+          w !,Controlerror	  
+    }
 
+	w !
 	w !,"Dashboards tested: "_countOfDashboards,!
 	w "Pivots tested: "_countOfPivots,!
 	w "Pivots errors: "_countOfPitotErrors,!
@@ -153,7 +188,7 @@ ClassMethod checkDashboards(stopOnError As %Boolean = 0) As %Status
 }
 
 /// do ##class(dev.bi).checkDashboard("Basic Dashboard Demo.dashboard")
-ClassMethod checkDashboard(dashboardName, ByRef countOfPivots = 0, ByRef countOfPitotErrors = 0, ByRef countOfControlErrors = 0, ByRef scStop = 0) As %Status
+ClassMethod checkDashboard(dashboardName, ByRef countOfPivots = 0, ByRef countOfPitotErrors = 0, ByRef countOfControlErrors = 0, ByRef scStop = 0, ByRef pivotsError, ByRef controlError) As %Status
 {
 	set dashboard = ##class(%DeepSee.Dashboard.Utils).%OpenDashboard(dashboardName,.tSC)
 	
@@ -165,6 +200,8 @@ ClassMethod checkDashboard(dashboardName, ByRef countOfPivots = 0, ByRef countOf
 
 	w !,"Dashboard name: "_dashboardName,!
 	;set wDashName = 1
+	set pivotsError = ""
+	set controlError = ""
 	for i=1:1:dashboard.widgets.Count()
 	{
 		set widget = dashboard.widgets.GetAt(i)
@@ -192,9 +229,11 @@ ClassMethod checkDashboard(dashboardName, ByRef countOfPivots = 0, ByRef countOf
 		w "Pivot name: "_ pivotFullName,!
 		set pivotSC = ..checkPivot(pivotFullName,0)
 
+		
 		if $$$ISERR(pivotSC)
-		{
-			w "Pivot status: ",$system.Status.GetErrorText(pivotSC),!!
+		{	
+			set pivotsError = $system.Status.GetErrorText(pivotSC)
+			w "Pivot status: ",$system.Status.GetErrorText(pivotSC),!!	
 			set countOfPitotErrors = countOfPitotErrors + 1
 			set scStop = 1
 		}
@@ -217,8 +256,8 @@ ClassMethod checkDashboard(dashboardName, ByRef countOfPivots = 0, ByRef countOf
 
 				if $$$ISERR(controlSc)
 				{
-					set error = $system.Status.GetErrorText(controlSc)
-					w "Status: "_error,!
+					set controlError = $system.Status.GetErrorText(controlSc)
+					w "Status: "_controlError,!
 					set countOfControlErrors = countOfControlErrors + 1
 					set scStop = 1
 				}
@@ -227,7 +266,9 @@ ClassMethod checkDashboard(dashboardName, ByRef countOfPivots = 0, ByRef countOf
 					w "Status: OK!",!
 				}
 			}
+			
 		}
+
 	}
  	return $$$OK
 }
