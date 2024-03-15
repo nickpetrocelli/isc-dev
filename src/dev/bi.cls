@@ -96,12 +96,13 @@ ClassMethod checkPivots(stopOnError As %Boolean = 0) As %Status
 		set countOfPivots = countOfPivots + 1
 		set:$$$ISERR(sc) countOfErrors = countOfErrors + 1
 		quit:$$$ISERR(sc)&&stopOnError
-		set key = $order(listOfPivots(key))
 		// sometimes errors is empty 
 		if errors '= ""
 		{
 			set errorList = errorList _ $lb(errors, key)
-		}	
+		}
+		
+		set key = $order(listOfPivots(key))	
 	}
 	// going through list with pivots and errors
 	w !, "Pivot errors and pivots summary"
